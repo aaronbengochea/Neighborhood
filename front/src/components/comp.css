@@ -1,0 +1,215 @@
+nav {
+    padding: 10px 0;
+    background: #f0f0f0;
+  }
+  
+  nav a {
+    padding: 10px 15px;
+    margin: 0 10px;
+    text-decoration: none;
+    color: black;
+  }
+  
+  nav a.active {
+    background-color: #007bff;
+    color: white;
+  }
+
+  
+  li p {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 500px; /* Adjust based on your design */
+  }
+  
+  .thread-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px;
+  }
+  
+  .thread-card {
+    background-color: #ffffff;
+    border: 1px solid #dddddd;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .thread-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+  }
+  
+  .thread-card h2 {
+    font-size: 18px;
+    color: #333333;
+    margin-bottom: 8px;
+  }
+  
+  .thread-card .thread-body {
+    font-size: 16px;
+    color: #666666;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* Limit to three lines */
+    -webkit-box-orient: vertical;
+  }
+  
+  .thread-card .thread-date {
+    font-size: 14px;
+    color: #999999;
+    margin-top: 10px;
+  }
+  
+  .thread-card small {
+    font-weight: normal;
+    color: #777777;
+  }
+
+  .button-container {
+    display: flex;
+    padding-left: 20px;
+    gap: 15px; /* Space between buttons */
+    margin-bottom: 0px; /* Space below the button container */
+  }
+  
+  .toggle-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    border-radius: 20px;
+    cursor: pointer;
+    outline: none;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+  }
+  
+  .toggle-button.toggle-off {
+    background-color: #FFA500; /* Orange background for the "on" state (Created) */
+    border: 1px solid #cc8400; /* Darker shade of orange for the border */
+  }
+  
+  .toggle-button.toggle-on {
+    background-color: #4CAF50; /* Green background for the "off" state (Received) */
+    border: 1px solid #3a8f40; /* Darker shade of green for the border */
+  }
+
+  .toggle-button.toggle-on:hover {
+    background-color: #3a8f40; /* Green background for the "off" state (Received) */
+    border: 1px solid #3a8f40; /* Darker shade of green for the border */
+  }
+
+  .toggle-button.toggle-off:hover {
+    background-color: #cc8400; /* Orange background for the "on" state (Created) */
+    border: 1px solid #cc8400; /* Darker shade of orange for the border */
+  }
+  
+  .toggle-button:focus {
+    box-shadow: 0 0 8px 3px rgba(0, 0, 0, 0.25); /* Enhanced focus shadow */
+  }
+  
+  .toggle-button:active {
+    transform: scale(0.98); /* Slightly shrink when pressed */
+  }
+  
+
+
+
+  .create-thread-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    border: 1px solid #0056b3;
+    background-color: #007BFF; /* Primary blue */
+    border-radius: 20px;
+    cursor: pointer;
+    outline: none;
+    transition: background-color 0.3s, box-shadow 0.3s, transform 0.2s ease;
+  }
+  
+  .create-thread-button:hover {
+    background-color: #0056b3;
+
+  }
+  
+  .create-thread-button:active {
+    transform: scale(0.98); /* Slightly shrink when pressed */
+
+  }
+  
+  .create-thread-button:focus {
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5); /* Focus outline */
+  }
+  
+  
+  .form-container {
+    background-color: #fff; /* White background */
+    padding: 20px;
+    border-radius: 8px; /* Rounded corners like cards */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    max-width: 600px; /* Limit the width of the form */
+    margin: 20px auto; /* Centering the form */
+  }
+  
+
+
+
+  /* styles.css */
+.form-container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 20px auto;
+  }
+  
+  .form-field {
+    margin-bottom: 20px;
+    margin-right: 20px;
+    margin-left: 0px;
+  }
+  
+  .form-field label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+    font-size: 16px;
+  }
+  
+  .form-field input, .form-field select, .form-field textarea {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+    border-color: #007BFF;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5);
+    outline: none;
+  }
+  
+  .button {
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    border: 1px solid #0056b3;
+    background-color: #007BFF; /* Primary blue */
+    border-radius: 20px;
+    cursor: pointer;
+    outline: none;
+    transition: background-color 0.3s, box-shadow 0.3s, transform 0.2s ease;
+  }
+  
+  .button:hover {
+    background-color: #0056b3;
+  }
+  
+  
