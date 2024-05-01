@@ -6,10 +6,8 @@ function NeighborsFeed() {
     <div>
       <Header/>
       <h1>Neighbors Feed</h1>
-      <p>This is the Neighbors feed.
-
-        Will update tomorrow.
-      </p>
+      <p>This is the Neighbors feed.</p>
+      <p>Build out neighbor feed, figure out coord system api, search friends and add friends.</p>
     </div>
   );
 }
