@@ -360,6 +360,200 @@ try {
 
 
 
+const friendsListFetch = async (req, res) => {
+  const { uid } = req.params;
+
+try {
+
+  const friendsListFetchQuery = `
+  WITH t1 AS (
+    SELECT 
+    CASE 
+      WHEN f1 = $1 THEN f2  
+      ELSE f1              
+    END AS friend_id
+    FROM friends
+    WHERE 
+    (f1 = $1 OR f2 = $1)    
+    AND accepted = true 
+  )
+  
+  SELECT u.username, b.b_name
+  FROM t1, users u, memberships m, blocks b
+  WHERE 
+    u.uid = t1.friend_id
+    AND u.uid = m.uid
+    AND m.bid = b.bid
+  ORDER BY username asc
+  `;
+  const threadResult = await pool.query(friendsListFetchQuery, [uid]);
+
+  if (threadResult.rows.length > 0) {
+    console.log(threadResult.rows)
+    res.status(200).json({ threads: threadResult.rows });
+  } else {
+    res.status(404).send('No created neighbors threads found for this user');
+  }
+} catch (error) {
+  console.error('Database query error:', error.stack);
+  res.status(500).json({ error: 'Internal server error' });
+}
+}
+
+
+const neighborsListFetch = async (req, res) => {
+  const { uid } = req.params;
+
+try {
+
+  const neighborsListFetchQuery = `
+      select u.username, b.b_name
+      from neighbors n, users u, memberships m, blocks b
+      where 
+        n.n1 = $1
+        and n.n2 = u.uid
+        and n.n2 = m.uid
+        and m.bid = b.bid
+      order by username asc
+  `;
+  const threadResult = await pool.query(neighborsListFetchQuery, [uid]);
+
+  if (threadResult.rows.length > 0) {
+    console.log(threadResult.rows)
+    res.status(200).json({ threads: threadResult.rows });
+  } else {
+    res.status(404).send('No created neighbors threads found for this user');
+  }
+} catch (error) {
+  console.error('Database query error:', error.stack);
+  res.status(500).json({ error: 'Internal server error' });
+}
+}
+
+
+
+const friendRequestsReceivedPendingFetch = async (req, res) => {
+  const { uid } = req.params;
+
+try {
+
+  const neighborsListFetchQuery = `
+      select u.username, b.b_name, f.request_time 
+      from friends f, users u, memberships m, blocks b
+      where 
+        f.f1 != $1
+        and f.f2 = $1
+        and f.accepted = false
+        and f.f1 = u.uid
+        and f.f1 = m.uid
+        and m.bid = b.bid
+  `;
+  const threadResult = await pool.query(neighborsListFetchQuery, [uid]);
+
+  if (threadResult.rows.length > 0) {
+    console.log(threadResult.rows)
+    res.status(200).json({ threads: threadResult.rows });
+  } else {
+    res.status(404).send('No created neighbors threads found for this user');
+  }
+} catch (error) {
+  console.error('Database query error:', error.stack);
+  res.status(500).json({ error: 'Internal server error' });
+}
+}
+
+
+
+const friendRequestsSentPendingFetch = async (req, res) => {
+  const { uid } = req.params;
+
+try {
+
+  const neighborsListFetchQuery = `
+      select u.username, b.b_name, f.request_time
+      from friends f, users u, memberships m, blocks b
+      where 
+        f.f1 = $1
+        and f.f2 != $1
+        and f.accepted = false
+        and f.f2 = u.uid
+        and f.f2 = m.uid
+        and m.bid = b.bid
+  `;
+  const threadResult = await pool.query(neighborsListFetchQuery, [uid]);
+
+  if (threadResult.rows.length > 0) {
+    console.log(threadResult.rows)
+    res.status(200).json({ threads: threadResult.rows });
+  } else {
+    res.status(404).send('No created neighbors threads found for this user');
+  }
+} catch (error) {
+  console.error('Database query error:', error.stack);
+  res.status(500).json({ error: 'Internal server error' });
+}
+}
+
+
+const prospectiveMembersFetch = async (req, res) => {
+  const { uid } = req.params;
+
+try {
+
+  const neighborsListFetchQuery = `
+      with t1 as (
+        select bid
+        from memberships
+        where uid = $1
+      ),
+      
+      t2 as (
+        select j.uid, j.bid 
+        from join_blocks j, join_block_votes v, t1
+        where 
+          j.bid = t1.bid
+          and v.voter = $1
+          and v.joiner = j.uid
+      )
+      
+      select j.uid, j.bid, u.username, b.b_name
+      from join_blocks j, t2, users u, blocks b
+      where 
+        j.bid = t2.bid
+        and t2.uid != j.uid
+        and j.uid = u.uid
+        and j.bid = b.bid
+  `;
+  const threadResult = await pool.query(neighborsListFetchQuery, [uid]);
+
+  if (threadResult.rows.length > 0) {
+    console.log(threadResult.rows)
+    res.status(200).json({ threads: threadResult.rows });
+  } else {
+    res.status(404).send('No created neighbors threads found for this user');
+  }
+} catch (error) {
+  console.error('Database query error:', error.stack);
+  res.status(500).json({ error: 'Internal server error' });
+}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 const createThread = async (req, res) => {
@@ -535,6 +729,11 @@ module.exports = {
     neighborsFeedThreadsReceived,
     neighborsFeedThreadsCreated,
     createThread,
+    friendsListFetch,
+    neighborsListFetch,
+    friendRequestsReceivedPendingFetch,
+    friendRequestsSentPendingFetch,
+    prospectiveMembersFetch,
 
     
 }

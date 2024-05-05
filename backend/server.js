@@ -23,6 +23,15 @@ app.get('/friendsFeedThreads/createdFriends/:uid', db.friendsFeedThreadsCreated)
 app.get('/neighborsFeedThreads/createdNeighbors/:uid', db.neighborsFeedThreadsCreated)
 app.get('/neighborsFeedThreads/receivedNeighbors/:uid', db.neighborsFeedThreadsReceived)
 app.post('/createThread', db.createThread)
+app.get('/friendsList/:uid', db.friendsListFetch)
+app.get('/neighborsList/:uid', db.neighborsListFetch)
+app.get('/friendRequestsRecievedPending/:uid', db.friendRequestsReceivedPendingFetch)
+app.get('/friendRequestsSentPending/:uid', db.friendRequestsSentPendingFetch)
+app.get('/membershipSeekers/:uid', db.prospectiveMembersFetch)
+
+
+
+
 
 app.get('/visit', (req, res) => {
   res.json({ message: 'Hello from the backend!' });

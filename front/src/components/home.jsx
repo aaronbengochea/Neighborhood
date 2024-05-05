@@ -1,19 +1,28 @@
 import React from 'react';
-import { Header } from './header'
+import { FriendsList } from './friendsList';
+import { NeighborsList } from './neighborsList';
+import  {AcceptFriendRequests} from './friendRequestReceived'
+import { PendingFriendRequests } from './friendRequestSent'
+import { MembershipVoting } from './membershipVoting'
+import { Header } from './header';
+import './comp.css';
 
 function Home() {
-  const uid = localStorage.getItem('uid'); // Retrieve UID from localStorage
 
   return (
-    
     <div>
-        <Header />
-
-
-      <h1>Welcome to the Home Page</h1>
-      <p>Your User ID: {uid}</p>
+      <Header />
+      <h1>Home</h1>
+      <div className="list-container">
+        <FriendsList />
+        <NeighborsList />
+        <AcceptFriendRequests/>
+        <PendingFriendRequests/>
+        <MembershipVoting/>
+      </div>
     </div>
   );
 }
 
-export {Home}
+export { Home };
+

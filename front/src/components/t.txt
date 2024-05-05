@@ -1,0 +1,26 @@
+  .form-field {
+    margin-bottom: 15px; /* Space between fields */
+  }
+  
+  .form-field label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333; /* Dark grey text for better readability */
+    font-size: 16px;
+  }
+  
+  .form-field input, .form-field select, .form-field textarea {
+    width: 100%; /* Full width */
+    padding: 10px;
+    font-size: 14px;
+    font-family: sans-serif;
+    border: 1px solid #ccc; /* Light grey border */
+    border-radius: 4px; /* Slightly rounded edges for input fields */
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1); /* Inner shadow for depth */
+  }
+  
+  .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+    border-color: #007BFF; /* Blue border on focus */
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25); /* Glow effect */
+    outline: none; /* Remove default focus outline */
+  }
