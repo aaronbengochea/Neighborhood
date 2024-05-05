@@ -20,6 +20,8 @@ app.get('/neighborhoodFeedThreads/receivedNeighborhood/:uid', db.neighborhoodFee
 app.get('/neighborhoodFeedThreads/createdNeighborhood/:uid', db.neighborhoodFeedThreadsCreated)
 app.get('/friendsFeedThreads/receivedFriends/:uid', db.friendsFeedThreadsRecieved)
 app.get('/friendsFeedThreads/createdFriends/:uid', db.friendsFeedThreadsCreated)
+app.get('/neighborsFeedThreads/createdNeighbors/:uid', db.neighborsFeedThreadsCreated)
+app.get('/neighborsFeedThreads/receivedNeighbors/:uid', db.neighborsFeedThreadsReceived)
 app.post('/createThread', db.createThread)
 
 app.get('/visit', (req, res) => {

@@ -287,7 +287,7 @@ const friendsFeedThreadsCreated = async (req, res) => {
         FROM threads t, users u
         WHERE 
             t.uid = $1
-            AND t.uid = u.uid
+            AND cast(t.receiver as int) = u.uid
             AND receivertype = 'friend'
     `;
     const threadResult = await pool.query(threadQuery, [uid]);
@@ -302,6 +302,64 @@ const friendsFeedThreadsCreated = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 }
+
+const neighborsFeedThreadsReceived = async (req, res) => {
+  const { uid } = req.params;
+
+try {
+
+  const threadQuery = `
+      SELECT t.tid, t.subject, t.body, t.created, u.username
+      FROM threads t, users u
+      WHERE 
+        t.receivertype = 'neighbor'
+        AND t.receiver = $1
+        AND t.uid = u.uid
+      ORDER BY created DESC
+  `;
+  const threadResult = await pool.query(threadQuery, [uid]);
+
+  if (threadResult.rows.length > 0) {
+    res.status(200).json({ threads: threadResult.rows });
+  } else {
+    res.status(404).send('No received neighbors threads found for this user');
+  }
+} catch (error) {
+  console.error('Database query error:', error.stack);
+  res.status(500).json({ error: 'Internal server error' });
+}
+}
+
+
+const neighborsFeedThreadsCreated = async (req, res) => {
+  const { uid } = req.params;
+
+try {
+
+  const threadQuery = `
+      SELECT t.tid, t.subject, t.body, t.created, u.username
+      FROM threads t, users u
+      WHERE 
+        t.receivertype = 'neighbor'
+        AND t.uid = $1
+        AND cast(t.receiver as int) = u.uid
+      ORDER BY created DESC
+  `;
+  const threadResult = await pool.query(threadQuery, [uid]);
+
+  if (threadResult.rows.length > 0) {
+    res.status(200).json({ threads: threadResult.rows });
+  } else {
+    res.status(404).send('No created neighbors threads found for this user');
+  }
+} catch (error) {
+  console.error('Database query error:', error.stack);
+  res.status(500).json({ error: 'Internal server error' });
+}
+}
+
+
+
 
 
 const createThread = async (req, res) => {
@@ -474,6 +532,8 @@ module.exports = {
     neighborhoodFeedThreadsCreated,
     friendsFeedThreadsRecieved,
     friendsFeedThreadsCreated,
+    neighborsFeedThreadsReceived,
+    neighborsFeedThreadsCreated,
     createThread,
 
     

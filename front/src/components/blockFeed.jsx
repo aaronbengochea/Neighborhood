@@ -43,7 +43,7 @@ function BlockFeed() {
       <div className="thread-list">
         {threads.map(thread => (
           <div key={thread.tid} className="thread-card" onClick={() => navigate(`/threads/${thread.tid}`)}>
-            <h2>{thread.subject} - <small>Posted by {thread.username}</small></h2>
+            <h2>{thread.subject} - <small>{showCreated ? `Sent to Block` : `Posted by ${thread.username}`}</small></h2>
             <p className="thread-body">{thread.body}</p>
             <p className="thread-date">Created at: {new Date(thread.created).toLocaleString()}</p>
           </div>
