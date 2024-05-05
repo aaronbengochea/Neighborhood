@@ -28,13 +28,12 @@ function AcceptFriendRequests() {
 
   return (
     <div className="accept-friends">
-      <h2>Pending Received Friend Requests</h2>
+      <h2>Received Friend Requests</h2>
       <ul>
         {requests.map(request => (
           <li key={request.username}>
             <span>{request.username} ----- {request.b_name} ({request.request_time})</span>
             <button className="accept-button">Accept</button>
-            <button className="reject-button">Reject</button>
           </li>
         ))}
       </ul>

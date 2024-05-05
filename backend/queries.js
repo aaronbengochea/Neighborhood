@@ -244,23 +244,23 @@ const friendsFeedThreadsRecieved = async (req, res) => {
 
     const threadQuery = `
         WITH t1 AS (
-            SELECT 
-            CASE 
-                WHEN f1 = $1 THEN f2  
-                ELSE f1              
-            END AS friend_id
-            FROM friends
-            WHERE 
-            (f1 = $1 OR f2 = $1)    
-            AND accepted = true 
+          SELECT 
+          CASE 
+            WHEN f1 = $1 THEN f2  
+            ELSE f1              
+          END AS friend_id
+          FROM friends
+          WHERE 
+          (f1 = $1 OR f2 = $1)    
+          AND accepted = true 
         )
-        
+                
         SELECT t.tid, t.subject, t.body, t.created, u.username
         FROM threads t, t1, users u
         WHERE 
-            t.uid = t1.friend_id
-            AND t1.friend_id = u.uid
-            AND receivertype = 'friend'
+          t.uid = t1.friend_id
+          AND t1.friend_id = u.uid
+          AND receivertype = 'friend'
         ORDER BY created DESC;
     `;
     const threadResult = await pool.query(threadQuery, [uid]);
@@ -366,25 +366,25 @@ const friendsListFetch = async (req, res) => {
 try {
 
   const friendsListFetchQuery = `
-  WITH t1 AS (
-    SELECT 
-    CASE 
-      WHEN f1 = $1 THEN f2  
-      ELSE f1              
-    END AS friend_id
-    FROM friends
-    WHERE 
-    (f1 = $1 OR f2 = $1)    
-    AND accepted = true 
-  )
-  
-  SELECT u.username, b.b_name
-  FROM t1, users u, memberships m, blocks b
-  WHERE 
-    u.uid = t1.friend_id
-    AND u.uid = m.uid
-    AND m.bid = b.bid
-  ORDER BY username asc
+      WITH t1 AS (
+        SELECT 
+        CASE 
+          WHEN f1 = $1 THEN f2  
+          ELSE f1              
+        END AS friend_id
+        FROM friends
+        WHERE 
+        (f1 = $1 OR f2 = $1)    
+        AND accepted = true 
+      )
+      
+      SELECT u.username, b.b_name
+      FROM t1, users u, memberships m, blocks b
+      WHERE 
+        u.uid = t1.friend_id
+        AND u.uid = m.uid
+        AND m.bid = b.bid
+      ORDER BY username asc
   `;
   const threadResult = await pool.query(friendsListFetchQuery, [uid]);
 
@@ -538,8 +538,61 @@ try {
 }
 }
 
+const findNeighborsFetch = async (req, res) => {
+  const { uid } = req.params;
 
+try {
 
+  const neighborsListFetchQuery = `
+      with t1 as (
+        select bid 
+        from memberships 
+        where uid = $1
+      )
+      
+      select m.uid, u.username, b.b_name 
+      from memberships m, users u, blocks b, t1
+      where 
+        m.bid = t1.bid
+        and m.uid != $1
+        and m.uid = u.uid
+        and m.bid = b.bid
+        and m.uid not in (
+          select n2 
+          from neighbors 
+          where n1 = $1
+        )
+  `;
+  const threadResult = await pool.query(neighborsListFetchQuery, [uid]);
+
+  if (threadResult.rows.length > 0) {
+    console.log(threadResult.rows)
+    res.status(200).json({ threads: threadResult.rows });
+  } else {
+    res.status(404).send('No created neighbors threads found for this user');
+  }
+} catch (error) {
+  console.error('Database query error:', error.stack);
+  res.status(500).json({ error: 'Internal server error' });
+}
+}
+
+const addNeighborsToList = async (req, res) => {
+  const { uid, neighborUid } = req.body;
+
+  try {
+    const insertQuery = `
+      INSERT INTO neighbors (n1, n2)
+      VALUES ($1, $2)
+      RETURNING *;
+    `;
+    const result = await pool.query(insertQuery, [uid, neighborUid]);
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error('Error creating thread:', error.stack);
+    res.status(500).send('Failed to create thread');
+  }
+}
 
 
 
@@ -734,6 +787,8 @@ module.exports = {
     friendRequestsReceivedPendingFetch,
     friendRequestsSentPendingFetch,
     prospectiveMembersFetch,
+    findNeighborsFetch,
+    addNeighborsToList,
 
     
 }

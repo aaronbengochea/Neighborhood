@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './comp.css';
 
-function NeighborsList() {
+function NeighborsList({reloadTrigger}) {
   const [neighbors, setNeighbors] = useState([]);
 
   useEffect(() => {
@@ -21,7 +21,7 @@ function NeighborsList() {
     };
 
     fetchNeighbors();
-  }, []);
+  }, [reloadTrigger]);
 
   return (
     <div className="neighbors-list">
