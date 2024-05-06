@@ -11,9 +11,14 @@ import './comp.css';
 function Home() {
 
   const [reloadNeighbors, setReloadNeighbors] = useState(false);
+  const [reloadFriends, setReloadFriends] = useState(false);
 
   const handleNeighborAdded = () => {
     setReloadNeighbors(prev => !prev); // Toggle the state to trigger reload
+  };
+
+  const handleFriendAccepted = () => {
+    setReloadFriends(prev => !prev); // Toggle the state to trigger reload
   };
 
   return (
@@ -21,9 +26,9 @@ function Home() {
       <Header />
       <h1>Home</h1>
       <div className="list-container">
-        <FriendsList />
+        <FriendsList reloadTrigger={reloadFriends}/>
         <NeighborsList reloadTrigger={reloadNeighbors}/>
-        <AcceptFriendRequests/>
+        <AcceptFriendRequests onFriendAccepted={handleFriendAccepted}/>
         <PendingFriendRequests/>
         <MembershipVoting/>
         <FindNeighbors onNeighborAdded={handleNeighborAdded}/>

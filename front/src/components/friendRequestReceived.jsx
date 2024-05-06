@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './comp.css';
 
-function AcceptFriendRequests() {
+function AcceptFriendRequests({onFriendAccepted}) {
   const [requests, setRequests] = useState([]);
 
   useEffect(() => {
@@ -26,14 +26,31 @@ function AcceptFriendRequests() {
     fetchRequests();
   }, []);
 
+    const acceptRequest = async (senderUid) => {
+        const uid = localStorage.getItem('uid');
+        try {
+        const res = await axios.post('http://localhost:4000/acceptFriendRequest', {
+            uid,
+            senderUid
+        });
+        console.log(res.data.message);
+
+        // Update the state to reflect the accepted request
+        onFriendAccepted()
+        setRequests(requests.filter(request => request.uid !== senderUid));
+        } catch (error) {
+        console.error('Failed to accept friend request:', error);
+        }
+    };
+
   return (
     <div className="accept-friends">
-      <h2>Received Friend Requests</h2>
+      <h2>Received Friend Requests - working w/ buttons</h2>
       <ul>
         {requests.map(request => (
           <li key={request.username}>
             <span>{request.username} ----- {request.b_name} ({request.request_time})</span>
-            <button className="accept-button">Accept</button>
+            <button className="accept-button" onClick={() => acceptRequest(request.uid)}>Accept</button>
           </li>
         ))}
       </ul>

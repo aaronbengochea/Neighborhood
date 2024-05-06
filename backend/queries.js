@@ -438,7 +438,7 @@ const friendRequestsReceivedPendingFetch = async (req, res) => {
 try {
 
   const neighborsListFetchQuery = `
-      select u.username, b.b_name, f.request_time 
+      select u.uid, u.username, b.b_name, f.request_time 
       from friends f, users u, memberships m, blocks b
       where 
         f.f1 != $1
@@ -595,8 +595,23 @@ const addNeighborsToList = async (req, res) => {
 }
 
 
+const acceptFriendRequest = async (req, res) => {
+  const { uid, senderUid } = req.body;
 
-
+  try {
+    const insertQuery = `
+      update friends
+      set accepted = true
+      where f1 = $2
+        and f2 = $1
+    `;
+    const result = await pool.query(insertQuery, [uid, senderUid]);
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error('Error creating thread:', error.stack);
+    res.status(500).send('Failed to create thread');
+  }
+}
 
 
 
@@ -789,6 +804,7 @@ module.exports = {
     prospectiveMembersFetch,
     findNeighborsFetch,
     addNeighborsToList,
+    acceptFriendRequest,
 
     
 }
