@@ -43,7 +43,7 @@ function Register() {
 
     if (response.data.status === 'OK') {
       const location = response.data.results[0].geometry.location;
-      return `(${location.lng}, ${location.lat})`;  // Point format: "(x, y)"
+      return `(${location.lat}, ${location.lng})`;  // Point format: "(x, y)"
     } else {
       throw new Error('Geocoding failed');
     }
