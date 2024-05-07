@@ -718,15 +718,15 @@ const joinBlockHelper = async (uid, bid) => {
 };
 
 const userSignupHelper = async (userData) => {
-    const { fname, lname, email, addrs1, addrs2, city, state, zip, username, pass } = userData;
+    const { fname, lname, email, addrs1, addrs2, city, state, zip, username, pass ,location} = userData;
     const query = `
-        INSERT INTO users (fname, lname, email, addrs1, addrs2, city, state, zip, username, pass)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        INSERT INTO users (fname, lname, email, addrs1, addrs2, city, state, zip, username, pass, location)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
         RETURNING uid;
     `;
 
     try {
-        const { rows } = await pool.query(query, [fname, lname, email, addrs1, addrs2, city, state, zip, username, pass]);
+        const { rows } = await pool.query(query, [fname, lname, email, addrs1, addrs2, city, state, zip, username, pass, location]);
         return rows[0].uid  // This returns the user ID of the newly created user
     } catch (error) {
         if (error.code === '23505') { // 23505 is the error code for unique_violation
