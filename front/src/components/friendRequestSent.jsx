@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './comp.css';
 
-function PendingFriendRequests() {
+function PendingFriendRequests({reloadTrigger}) {
   const [requests, setRequests] = useState([]);
 
   useEffect(() => {
@@ -24,7 +24,7 @@ function PendingFriendRequests() {
     };
 
     fetchPendingRequests();
-  }, []);
+  }, [reloadTrigger]);
 
   return (
     <div className="pending-friends">
@@ -32,7 +32,7 @@ function PendingFriendRequests() {
       <ul>
         {requests.map(request => (
           <li key={request.username}>
-            <span>{request.username} ----- {request.b_name} ({request.request_time})</span>
+            <span>{request.username} ----- ({request.request_time})</span>
             <button className="revoke-button">Revoke</button>
           </li>
         ))}

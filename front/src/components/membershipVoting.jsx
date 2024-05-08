@@ -50,8 +50,7 @@ function MembershipVoting() {
 
   return (
     <div className="membership-voting">
-      <h2>Membership Voting - working w/button</h2>
-      <h2>Need to add backend logic to check if enough to become member upon each vote</h2>
+      <h2>Membership Voting - working w/button + updating membership if needed</h2>
       <ul>
         {applicants.map(applicant => (
           <li key={applicant.uid}>

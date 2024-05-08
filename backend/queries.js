@@ -492,18 +492,16 @@ const friendRequestsSentPendingFetch = async (req, res) => {
 
 try {
 
-  const neighborsListFetchQuery = `
-      select u.username, b.b_name, f.request_time
-      from friends f, users u, memberships m, blocks b
+  const friendsListFetchQuery = `
+      select u.username, f.request_time
+      from friends f, users u
       where 
         f.f1 = $1
         and f.f2 != $1
         and f.accepted = false
         and f.f2 = u.uid
-        and f.f2 = m.uid
-        and m.bid = b.bid
   `;
-  const threadResult = await pool.query(neighborsListFetchQuery, [uid]);
+  const threadResult = await pool.query(friendsListFetchQuery, [uid]);
 
   if (threadResult.rows.length > 0) {
     console.log(threadResult.rows)
@@ -664,9 +662,6 @@ try {
 
 
 
-
-
-
 const createThread = async (req, res) => {
     const { uid, subject, body, receiverType } = req.body;
     let receiverId;
@@ -715,24 +710,200 @@ const createThread = async (req, res) => {
   const submitMembershipVote = async (req, res) => {
     const { voter, joiner, block } = req.body;
     try {
+        // Insert vote into the database
+        const insertVoteQuery = `
+            INSERT INTO join_block_votes (voter, joiner, block) 
+            VALUES ($1, $2, $3);
+        `;
+        await pool.query(insertVoteQuery, [voter, joiner, block]);
 
-      const query = `INSERT INTO join_block_votes (voter, joiner, block) 
-      VALUES ($1, $2, $3)`
-      // Insert vote into the database or update the membership status
-      const result = await pool.query(query, [voter, joiner, block] // Assuming 'accepted' is the vote type
-      );
-      res.status(200).json({ message: 'Vote processed successfully', result: result });
+        // Check total votes for the joiner in the specific block
+        const votesQuery = `
+            SELECT COUNT(joiner) AS vote_count
+            FROM join_block_votes
+            WHERE joiner = $1 AND block = $2;
+        `;
+        const votesResult = await pool.query(votesQuery, [joiner, block]);
+        const totalVotes = votesResult.rows[0].vote_count;
+
+        // Check total members in the block
+        const membersQuery = `
+            SELECT COUNT(uid) AS member_count
+            FROM memberships
+            WHERE bid = $1;
+        `;
+        const membersResult = await pool.query(membersQuery, [block]);
+        const totalMembers = membersResult.rows[0].member_count;
+
+        // Determine if membership conditions are met
+        let votesNeeded = totalMembers < 3 ? totalMembers : 3;
+        if (totalVotes >= votesNeeded) {
+            // Transaction to remove from join_block_votes and add to memberships
+            await pool.query('BEGIN');
+            const deleteJoinBlockQuery = `
+                DELETE FROM join_blocks 
+                WHERE uid = $1;
+            `;
+            await pool.query(deleteJoinBlockQuery, [joiner]);
+
+            const insertMembershipQuery = `
+                INSERT INTO memberships (uid, bid)
+                VALUES ($1, $2);
+            `;
+            await pool.query(insertMembershipQuery, [joiner, block]);
+            await pool.query('COMMIT');
+
+            res.status(200).json({ message: 'Membership updated successfully' });
+        } else {
+            res.status(200).json({ message: 'Vote recorded, but not enough votes for membership yet' });
+        }
     } catch (error) {
-      console.error('Error processing vote:', error);
-      res.status(500).json({ message: 'Failed to process vote', error: error });
+        await pool.query('ROLLBACK');
+        console.error('Error processing vote:', error);
+        res.status(500).json({ message: 'Failed to process vote', error: error });
+    }
+}
+
+
+
+const findFriendsFetch = async (req, res) => {
+  const { uid } = req.params;
+
+try {
+
+  const neighborsListFetchQuery = `
+      with t1 as (
+        SELECT 
+        CASE 
+        WHEN f1 = $1 THEN f2  
+        ELSE f1              
+        END AS friend_id
+        FROM friends
+        WHERE 
+        (f1 = $1 OR f2 = $1)
+        order by friend_id 
+        )
+        
+        select uid, username 
+        from users 
+        where uid not in (select friend_id from t1)
+          and uid != $1
+        order by username
+  `;
+  const threadResult = await pool.query(neighborsListFetchQuery, [uid]);
+
+  if (threadResult.rows.length > 0) {
+    console.log(threadResult.rows)
+    res.status(200).json({ threads: threadResult.rows });
+  } else {
+    res.status(404).send('No neighbors found for this user');
+  }
+} catch (error) {
+  console.error('Database query error:', error.stack);
+  res.status(500).json({ error: 'Internal server error' });
+}
+}
+
+const sendFriendRequest = async (req, res) => {
+  const { uid, friendUid } = req.body;
+
+  try {
+    const insertQuery = `
+      INSERT INTO friends (f1, f2, accepted, request_time)
+      VALUES ($1, $2, false, now())
+      RETURNING *;
+    `;
+    const result = await pool.query(insertQuery, [uid, friendUid]);
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error('Error creating thread:', error.stack);
+    res.status(500).send('Failed to create thread');
+  }
+}
+
+  const findBlocksToFollowFetch = async (req, res) => {
+    const { uid } = req.params;
+  
+  try {
+  
+    const neighborsListFetchQuery = `
+      with t1 as (
+        select bid 
+        from memberships
+        where uid = $1
+        ),
+        
+        t2 as (
+        select bid
+        from follow_blocks
+        where uid = $1
+        )
+        
+        select b.bid, b.b_name, n.n_name 
+        from blocks b
+        join neighborhoods n on n.nid = b.nid
+        where 
+          bid not in (select * from t1)
+          and bid not in (select * from t2)
+        order by bid
+    `;
+    const threadResult = await pool.query(neighborsListFetchQuery, [uid]);
+  
+    if (threadResult.rows.length > 0) {
+      console.log(threadResult.rows)
+      res.status(200).json({ threads: threadResult.rows });
+    } else {
+      res.status(404).send('No neighbors found for this user');
+    }
+  } catch (error) {
+    console.error('Database query error:', error.stack);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+  }
+
+  const followBlock = async (req, res) => {
+    const { uid, bid } = req.body;
+  
+    try {
+      const insertQuery = `
+        INSERT INTO follow_blocks (uid, bid)
+        VALUES ($1, $2)
+      `;
+      const result = await pool.query(insertQuery, [uid, bid]);
+      res.status(201).json(result.rows[0]);
+    } catch (error) {
+      console.error('Error creating thread:', error.stack);
+      res.status(500).send('Failed to create thread');
     }
   }
 
 
-
-
-
-
+  const findFollowedBlocksFetch = async (req, res) => {
+    const { uid } = req.params;
+  
+  try {
+  
+    const neighborsListFetchQuery = `
+        select f.bid, b.b_name, n.n_name
+        from follow_blocks f, blocks b, neighborhoods n
+        where 
+          uid = $1
+          and f.bid = b.bid
+          and b.nid = n.nid
+    `;
+    const threadResult = await pool.query(neighborsListFetchQuery, [uid]);
+  
+    if (threadResult.rows.length > 0) {
+      console.log(threadResult.rows)
+      res.status(200).json({ threads: threadResult.rows });
+    } else {
+      res.status(404).send('No neighbors found for this user');
+    }
+  } catch (error) {
+    console.error('Database query error:', error.stack);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+  }
 
 
 
@@ -864,6 +1035,11 @@ module.exports = {
     acceptFriendRequest,
     getUserProfile,
     submitMembershipVote,
+    findFriendsFetch,
+    sendFriendRequest,
+    findBlocksToFollowFetch,
+    followBlock,
+    findFollowedBlocksFetch,
 
     
 }

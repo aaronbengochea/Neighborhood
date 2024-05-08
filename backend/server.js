@@ -28,12 +28,17 @@ app.get('/neighborsList/:uid', db.neighborsListFetch)
 app.get('/friendRequestsRecievedPending/:uid', db.friendRequestsReceivedPendingFetch)
 app.get('/friendRequestsSentPending/:uid', db.friendRequestsSentPendingFetch)
 app.get('/membershipSeekers/:uid', db.prospectiveMembersFetch)
+
 app.post('/submitMembershipVote', db.submitMembershipVote)
 
 app.get('/findNeighbors/:uid', db.findNeighborsFetch)
 app.post('/addNeighborsToList', db.addNeighborsToList)
+app.get('/findFriends/:uid', db.findFriendsFetch)
+app.post('/sendFriendRequest', db.sendFriendRequest)
 app.post('/acceptFriendRequest', db.acceptFriendRequest)
-
+app.get('/findBlocksToFollowFetch/:uid', db.findBlocksToFollowFetch)
+app.post('/followBlock', db.followBlock)
+app.get('/findFollowedBlocksFetch/:uid', db.findFollowedBlocksFetch)
 
 
 app.get('/visit', (req, res) => {
