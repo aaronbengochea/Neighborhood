@@ -712,7 +712,21 @@ const createThread = async (req, res) => {
     }
   }
 
-  
+  const submitMembershipVote = async (req, res) => {
+    const { voter, joiner, block } = req.body;
+    try {
+
+      const query = `INSERT INTO join_block_votes (voter, joiner, block) 
+      VALUES ($1, $2, $3)`
+      // Insert vote into the database or update the membership status
+      const result = await pool.query(query, [voter, joiner, block] // Assuming 'accepted' is the vote type
+      );
+      res.status(200).json({ message: 'Vote processed successfully', result: result });
+    } catch (error) {
+      console.error('Error processing vote:', error);
+      res.status(500).json({ message: 'Failed to process vote', error: error });
+    }
+  }
 
 
 
@@ -849,6 +863,7 @@ module.exports = {
     addNeighborsToList,
     acceptFriendRequest,
     getUserProfile,
+    submitMembershipVote,
 
     
 }

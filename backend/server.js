@@ -28,6 +28,8 @@ app.get('/neighborsList/:uid', db.neighborsListFetch)
 app.get('/friendRequestsRecievedPending/:uid', db.friendRequestsReceivedPendingFetch)
 app.get('/friendRequestsSentPending/:uid', db.friendRequestsSentPendingFetch)
 app.get('/membershipSeekers/:uid', db.prospectiveMembersFetch)
+app.post('/submitMembershipVote', db.submitMembershipVote)
+
 app.get('/findNeighbors/:uid', db.findNeighborsFetch)
 app.post('/addNeighborsToList', db.addNeighborsToList)
 app.post('/acceptFriendRequest', db.acceptFriendRequest)
