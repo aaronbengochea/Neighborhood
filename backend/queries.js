@@ -1,19 +1,42 @@
 const pool = require('./dbconfig')
 
 const updateProfile = async (req, res) => {
-    const { uid, f_desc, f_photo } = req.body
+  const { uid, addrs1, addrs2, city, state, zip, location, f_desc, f_photo } = req.body;
+  
+  try {
+    // Update the users table
+    const updateUserQuery = `
+      UPDATE users
+      SET addrs1 = $1, addrs2 = $2, city = $3, state = $4, zip = $5, location = $6
+      WHERE uid = $7;
+    `;
+    await pool.query(updateUserQuery, [addrs1, addrs2, city, state, zip, location, uid]);
 
-    if (!uid) {
-        return res.status(400).send('User ID is required')
+    // Check if user has a profile in user_profiles
+    const profileCheckResult = await pool.query('SELECT * FROM user_profiles WHERE uid = $1;', [uid]);
+
+    if (profileCheckResult.rows.length > 0) {
+      // Update user_profiles table
+      const updateProfileQuery = `
+        UPDATE user_profiles
+        SET f_desc = $1, f_photo = $2
+        WHERE uid = $3;
+      `;
+      await pool.query(updateProfileQuery, [f_desc, f_photo, uid]);
+    } else {
+      // Insert into user_profiles table
+      const insertProfileQuery = `
+        INSERT INTO user_profiles (uid, f_desc, f_photo)
+        VALUES ($1, $2, $3);
+      `;
+      await pool.query(insertProfileQuery, [uid, f_desc, f_photo]);
     }
 
-    try {
-        const rowsAffected = await updateProfilesHelper(uid, f_desc, f_photo)
-        res.status(200).send(`Profile updated. Rows affected: ${rowsAffected}`)
-    } catch (error) {
-        console.error('Failed to update profile:', error)
-        res.status(500).send('Failed to update profile')
-    }
+    res.status(200).send('Profile updated successfully');
+  } catch (error) {
+    console.error('Failed to update profile:', error);
+    res.status(500).send('Failed to update profile');
+  }
 };
 
 const userSignin = async (req, res) => {
@@ -569,7 +592,7 @@ try {
     console.log(threadResult.rows)
     res.status(200).json({ threads: threadResult.rows });
   } else {
-    res.status(404).send('No created neighbors threads found for this user');
+    res.status(404).send('No neighbors found for this user');
   }
 } catch (error) {
   console.error('Database query error:', error.stack);
@@ -614,10 +637,30 @@ const acceptFriendRequest = async (req, res) => {
 }
 
 
+const getUserProfile = async (req, res) => {
+  const { uid } = req.params
 
+try {
 
+  const friendsListFetchQuery = `
+      select u.addrs1, u.addrs2, u.city, u.state, u.zip, p.f_desc, p.f_photo
+      from users u
+      full join user_profiles p on u.uid = p.uid
+      where u.uid = $1
+  `;
+  const threadResult = await pool.query(friendsListFetchQuery, [uid]);
 
-
+  if (threadResult.rows.length > 0) {
+    console.log(threadResult.rows)
+    res.status(200).json({ threads: threadResult.rows });
+  } else {
+    res.status(404).send('Could not fetch user profile');
+  }
+} catch (error) {
+  console.error('Database query error:', error.stack);
+  res.status(500).json({ error: 'Internal server error' });
+}
+}
 
 
 
@@ -805,6 +848,7 @@ module.exports = {
     findNeighborsFetch,
     addNeighborsToList,
     acceptFriendRequest,
+    getUserProfile,
 
     
 }

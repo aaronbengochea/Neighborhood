@@ -9,7 +9,7 @@ app.use(express.json())
 app.use(cors())
 
 
-
+app.get('/getUserProfile/:uid', db.getUserProfile)
 app.post('/updateUserProfile', db.updateProfile)
 app.post('/userSignup', db.userSignup)
 app.post('/userSignin', db.userSignin)
