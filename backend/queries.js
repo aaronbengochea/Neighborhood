@@ -312,6 +312,7 @@ const friendsFeedThreadsCreated = async (req, res) => {
             t.uid = $1
             AND cast(t.receiver as int) = u.uid
             AND receivertype = 'friend'
+        order by t.created desc
     `;
     const threadResult = await pool.query(threadQuery, [uid]);
 
@@ -382,7 +383,7 @@ try {
 }
 
 
-
+//Have to remove b_name because some friends wont be members of blocks
 const friendsListFetch = async (req, res) => {
   const { uid } = req.params;
 
@@ -663,43 +664,26 @@ try {
 
 
 const createThread = async (req, res) => {
-    const { uid, subject, body, receiverType } = req.body;
-    let receiverId;
+    const { uid, subject, body, receiverType, receiver } = req.body;
 
     try {
-      if (receiverType === 'neighborhood') {
-        const findNidQuery = `
-            SELECT b.nid 
-            FROM memberships m
-            JOIN blocks b ON m.bid = b.bid
-            WHERE uid = $1`;
-        const nidResult = await pool.query(findNidQuery, [uid]);
-        if (nidResult.rows.length === 0) {
-          return res.status(404).send('User not found or not associated with any neighborhood');
-        }
-        receiverId = nidResult.rows[0].nid;
-      } else if (receiverType === 'block') {
-        // Fetch the block id for this user
-        const findBidQuery = `
-            SELECT bid 
-            FROM memberships 
-            WHERE uid = $1`;
-        const bidResult = await pool.query(findBidQuery, [uid]);
-        if (bidResult.rows.length === 0) {
-          return res.status(404).send('User not found or not associated with any block');
-        }
-        receiverId = bidResult.rows[0].bid;
-      } else {
-        // Use the receiver id provided in the request for other types
-        receiverId = req.body.receiver;
-      }
 
-      const insertQuery = `
-        INSERT INTO threads (uid, subject, body, receiver, created, receivertype)
-        VALUES ($1, $2, $3, $4, now(), $5)
+      const findUserLocationQuery=`
+      select location 
+      from users 
+      where uid = $1
+      `;
+      const location = await pool.query(findUserLocationQuery, [uid]);
+      const locationData = location.rows[0].location
+      const finalLocationData = `(${locationData.x},${locationData.y})`
+      
+      const createThreadQuery = `
+        INSERT INTO threads (uid, subject, body, receiver, created, position, receivertype)
+        VALUES ($1, $2, $3, $4, now(), $5, $6)
         RETURNING *;
       `;
-      const result = await pool.query(insertQuery, [uid, subject, body, receiverId, receiverType]);
+      const result = await pool.query(createThreadQuery, [uid, subject, body, receiver, finalLocationData, receiverType]);
+      console.log(result)
       res.status(201).json(result.rows[0]);
     } catch (error) {
       console.error('Error creating thread:', error.stack);
@@ -905,6 +889,134 @@ const sendFriendRequest = async (req, res) => {
   }
   }
 
+  const friendsListThreadFetch = async (req, res) => {
+    const { uid } = req.params;
+  
+  try {
+  
+    const friendsListFetchQuery = `
+        WITH t1 AS (
+          SELECT 
+          CASE 
+            WHEN f1 = $1 THEN f2  
+            ELSE f1              
+          END AS friend_id
+          FROM friends
+          WHERE 
+          (f1 = $1 OR f2 = $1)    
+          AND accepted = true 
+        )
+        
+        SELECT u.uid, u.username
+        FROM t1, users u
+        WHERE 
+          u.uid = t1.friend_id
+        order by username
+         
+    `;
+    const threadResult = await pool.query(friendsListFetchQuery, [uid]);
+  
+    if (threadResult.rows.length > 0) {
+      console.log(threadResult.rows)
+      res.status(200).json({ threads: threadResult.rows });
+    } else {
+      res.status(404).send('No created neighbors threads found for this user');
+    }
+  } catch (error) {
+    console.error('Database query error:', error.stack);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+  }
+
+  const neighborsListThreadFetch = async (req, res) => {
+    const { uid } = req.params;
+  
+  try {
+  
+    const friendsListFetchQuery = `
+        select u.uid, u.username 
+        from neighbors n, users u
+        where 
+          n.n1 = $1
+          and n.n2 = u.uid
+         
+    `;
+    const threadResult = await pool.query(friendsListFetchQuery, [uid]);
+  
+    if (threadResult.rows.length > 0) {
+      console.log(threadResult.rows)
+      res.status(200).json({ threads: threadResult.rows });
+    } else {
+      res.status(404).send('No created neighbors threads found for this user');
+    }
+  } catch (error) {
+    console.error('Database query error:', error.stack);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+  }
+
+  const blockFetch = async (req, res) => {
+    const { uid } = req.params;
+  
+  try {
+  
+    const friendsListFetchQuery = `
+        select m.bid, b.b_name 
+        from memberships m, blocks b
+        where 
+          m.uid = $1
+          and m.bid = b.bid
+         
+    `;
+    const threadResult = await pool.query(friendsListFetchQuery, [uid]);
+  
+    if (threadResult.rows.length > 0) {
+      console.log(threadResult.rows)
+      res.status(200).json({ threads: threadResult.rows });
+    } else {
+      res.status(404).send('User is not a member of a block');
+    }
+  } catch (error) {
+    console.error('Database query error:', error.stack);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+  }
+
+
+  const neighborhoodFetch = async (req, res) => {
+    const { uid } = req.params;
+  
+  try {
+  
+    const neighborhoodQuery = `
+        select n.nid, n.n_name
+        from memberships m, blocks b, neighborhoods n
+        where 
+          m.uid = $1
+          and m.bid = b.bid
+          and b.nid = n.nid
+         
+    `;
+    const threadResult = await pool.query(neighborhoodQuery, [uid]);
+  
+    if (threadResult.rows.length > 0) {
+      console.log(threadResult.rows)
+      res.status(200).json({ threads: threadResult.rows });
+    } else {
+      res.status(404).send('User is not a member of a neighborhood');
+    }
+  } catch (error) {
+    console.error('Database query error:', error.stack);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+  }
+
+
+
+
+
+
+
 
 
 
@@ -947,12 +1059,14 @@ const joinBlockHelper = async (uid, bid) => {
 
 const userSignupHelper = async (userData) => {
     const { fname, lname, email, addrs1, addrs2, city, state, zip, username, pass ,location} = userData;
+    console.log(location)
+    
     const query = `
         INSERT INTO users (fname, lname, email, addrs1, addrs2, city, state, zip, username, pass, location)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
         RETURNING uid;
     `;
-
+    /*
     try {
         const { rows } = await pool.query(query, [fname, lname, email, addrs1, addrs2, city, state, zip, username, pass, location]);
         return rows[0].uid  // This returns the user ID of the newly created user
@@ -966,7 +1080,9 @@ const userSignupHelper = async (userData) => {
             }
         }
         throw error;
+        
     }
+    */
 };
 
 // Helper function for updateProfile
@@ -1040,6 +1156,10 @@ module.exports = {
     findBlocksToFollowFetch,
     followBlock,
     findFollowedBlocksFetch,
+    friendsListThreadFetch,
+    neighborsListThreadFetch,
+    blockFetch,
+    neighborhoodFetch,
 
     
 }

@@ -39,6 +39,10 @@ app.post('/acceptFriendRequest', db.acceptFriendRequest)
 app.get('/findBlocksToFollowFetch/:uid', db.findBlocksToFollowFetch)
 app.post('/followBlock', db.followBlock)
 app.get('/findFollowedBlocksFetch/:uid', db.findFollowedBlocksFetch)
+app.get('/friendsListThreadFetch/:uid', db.friendsListThreadFetch)
+app.get('/neighborsListThreadFetch/:uid', db.neighborsListThreadFetch)
+app.get('/blockFetch/:uid', db.blockFetch)
+app.get('/neighborhoodFetch/:uid', db.neighborhoodFetch)
 
 
 app.get('/visit', (req, res) => {
