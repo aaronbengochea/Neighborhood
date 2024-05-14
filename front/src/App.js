@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Signin, Register, Home, BlockFeed, NeighborhoodFeed, NeighborsFeed, FriendsFeed, CreateThread, EditUserProfile} from './components';
+import { Signin, Register, Home, BlockFeed, NeighborhoodFeed, NeighborsFeed, FriendsFeed, CreateThread, EditUserProfile, FollowedBlocksFeed} from './components';
 import { ThreadDetail } from './components/threadDetail';
 
 function App() {
@@ -14,6 +14,7 @@ function App() {
           <Route path='/home' element={<Home/>}/>
           <Route path='/editUserProfile' element={<EditUserProfile/>}/>
           <Route path='/blockFeed' element={<BlockFeed/>}/>
+          <Route path='/followedBlocksFeed' element={<FollowedBlocksFeed/>}/>
           <Route path='/neighborhoodFeed' element={<NeighborhoodFeed/>}/>
           <Route path='/friendsFeed' element={<FriendsFeed/>}/>
           <Route path='/neighborsFeed' element={<NeighborsFeed/>}/>

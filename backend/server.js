@@ -28,9 +28,7 @@ app.get('/neighborsList/:uid', db.neighborsListFetch)
 app.get('/friendRequestsRecievedPending/:uid', db.friendRequestsReceivedPendingFetch)
 app.get('/friendRequestsSentPending/:uid', db.friendRequestsSentPendingFetch)
 app.get('/membershipSeekers/:uid', db.prospectiveMembersFetch)
-
 app.post('/submitMembershipVote', db.submitMembershipVote)
-
 app.get('/findNeighbors/:uid', db.findNeighborsFetch)
 app.post('/addNeighborsToList', db.addNeighborsToList)
 app.get('/findFriends/:uid', db.findFriendsFetch)
@@ -43,6 +41,7 @@ app.get('/friendsListThreadFetch/:uid', db.friendsListThreadFetch)
 app.get('/neighborsListThreadFetch/:uid', db.neighborsListThreadFetch)
 app.get('/blockFetch/:uid', db.blockFetch)
 app.get('/neighborhoodFetch/:uid', db.neighborhoodFetch)
+app.get('/followedBlocksFeedThreads/receivedFollowedBlocks/:uid', db.followedBlocksFeedThreadsRecieved)
 
 
 app.get('/visit', (req, res) => {

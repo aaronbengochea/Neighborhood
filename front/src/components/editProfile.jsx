@@ -77,6 +77,7 @@ const EditUserProfile = () => {
         const location = await geocodeAddress(fullAddress);
 
         const updatedData = { ...formData, location, uid};
+        console.log(updatedData)
         const url = 'http://localhost:4000/updateUserProfile';
         const res = await axios.post(url, updatedData);
         console.log(location)

@@ -1,24 +1,22 @@
 const pool = require('./dbconfig')
 
 const updateProfile = async (req, res) => {
-  const { uid, addrs1, addrs2, city, state, zip, location, f_desc, f_photo } = req.body;
-  
+  const { uid, addrs1, addrs2, city, state, zip, location, f_desc, f_photo } = req.body
+
   try {
     const updateUserQuery = `
       UPDATE users
       SET addrs1 = $1, addrs2 = $2, city = $3, state = $4, zip = $5, location = $6
       WHERE uid = $7
     `;
-    await pool.query(updateUserQuery, [addrs1, addrs2, city, state, zip, location, uid]);
-
+    await pool.query(updateUserQuery, [addrs1, addrs2, city, state, zip, location, uid])
 
     const profileCheckQuery = `
-      UPDATE users
-      SET addrs1 = $1, addrs2 = $2, city = $3, state = $4, zip = $5, location = $6
-      WHERE uid = $7
+      SELECT * 
+      FROM user_profiles 
+      WHERE uid = $1;
     `;
-
-    const profileCheckResult = await pool.query(profileCheckQuery, [uid]);
+    const profileCheckResult = await pool.query(profileCheckQuery, [uid])
 
     if (profileCheckResult.rows.length > 0) {
       // Update user_profiles table
@@ -27,120 +25,133 @@ const updateProfile = async (req, res) => {
         SET f_desc = $1, f_photo = $2
         WHERE uid = $3;
       `;
-      await pool.query(updateProfileQuery, [f_desc, f_photo, uid]);
+      await pool.query(updateProfileQuery, [f_desc, f_photo, uid])
     } else {
       // Insert into user_profiles table
       const insertProfileQuery = `
         INSERT INTO user_profiles (uid, f_desc, f_photo)
         VALUES ($1, $2, $3);
       `;
-      await pool.query(insertProfileQuery, [uid, f_desc, f_photo]);
+      await pool.query(insertProfileQuery, [uid, f_desc, f_photo])
     }
 
-    res.status(200).send('Profile updated successfully');
+    res.status(200).send('Profile updated successfully')
   } catch (error) {
-    console.error('Failed to update profile:', error);
-    res.status(500).send('Failed to update profile');
+    console.error('Failed to update profile:', error)
+    res.status(500).send('Failed to update profile')
   }
-};
+}
+
 
 const userSignin = async (req, res) => {
-    console.log('someone came to signin')
-    const { email, password } = req.body;
+  const { email, password } = req.body
 
   try {
-    const query = 'SELECT uid FROM users WHERE email = $1 AND pass = $2';
-    const values = [email, password];
-    const result = await pool.query(query, values);
+    const checkUserPassword = `
+      SELECT uid 
+      FROM users 
+      WHERE 
+        email = $1 
+        AND pass = $2
+      `;
+    const result = await pool.query(checkUserPassword, [email, password])
 
     if (result.rows.length > 0) {
-      // User found, return the UID
-      res.status(200).json({ uid: result.rows[0].uid });
+      res.status(200).json({ uid: result.rows[0].uid })
     } else {
-      // User not found or wrong password
-      res.status(404).json({ error: 'Invalid credentials' });
+      res.status(404).json({ error: 'Invalid credentials' })
     }
   } catch (error) {
     console.error('Database query error', error.stack);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error' })
   }
 }
+
 
 const userSignup = async (req, res) => {
-    console.log('someone came to signup')
-    try {
-        const uid = await userSignupHelper(req.body)
-        res.status(201).send({ uid: uid, message: 'User successfully created' })
-    } catch (error) {
-        if (error.message === 'Username already in use') {
-            return res.status(409).send({ error: error.message })
-        }
-        if (error.message === 'Email already in use') {
-            return res.status(409).send({ error: error.message })
-        }
+  const { fname, lname, email, addrs1, addrs2, city, state, zip, username, pass ,location} = req.body
+  
+  try {
+    
+    const userSignupQuery = `
+      INSERT INTO users (fname, lname, email, addrs1, addrs2, city, state, zip, username, pass, location)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      RETURNING uid;
+    `;
+    const res = await pool.query(userSignupQuery, [fname, lname, email, addrs1, addrs2, city, state, zip, username, pass ,location]);
+    
+    res.status(201).send({res: uid, message: 'User successfully created' })
 
-
-        console.error('Signup failed:', error);
-        res.status(500).send({ error: 'Internal server error' })
+  } catch (error) {
+    if (error.message === 'Username already in use') {
+      return res.status(409).send({ error: error.message })
     }
-};
-
-const joinBlock = async (req, res) => {
-    const { uid, bid } = req.body
-
-    if (!uid || !bid === null) {
-        return res.status(400).send({ error: 'Missing required fields' })
+    if (error.message === 'Email already in use') {
+      return res.status(409).send({ error: error.message })
     }
-
-    try {
-        const result = await joinBlockHelper(uid, bid);
-        res.status(200).send(result)
-    } catch (error) {
-        console.error('Failed to process membership:', error);
-        res.status(500).send({ error: 'Internal server error' })
-    }
+      console.error('Signup failed:', error);
+      res.status(500).send({ error: 'Internal server error' })
+  }
 }
 
-const blockFeedThreadsRecieved = async (req, res) => {
-    const { uid } = req.params;
-  
-    try {
-      const findBlock = `
-        SELECT bid 
-        FROM memberships 
-        WHERE uid = $1`; 
-      const userResult = await pool.query(findBlock, [uid]);
-  
-      if (userResult.rows.length === 0) {
-        return res.status(404).send('User not found or not associated with any block');
-      }
-  
-      const blockId = userResult.rows[0].bid;
-      const blockIdString = blockId.toString()
-  
-      // Now fetch the threads for that block
-      const threadQuery = `
-        SELECT t.tid, t.subject, t.body, t.created, u.username
-        FROM threads t
-        JOIN users u ON t.uid = u.uid
-        WHERE 
-            t.uid != $1
-            AND receiverType = 'block'
-            AND receiver = $2
-        ORDER BY created DESC;
-      `;
-      const threadResult = await pool.query(threadQuery, [uid, blockIdString]);
-  
-      if (threadResult.rows.length > 0) {
-        res.status(200).json({ threads: threadResult.rows });
-      } else {
-        res.status(404).send('No received threads found for this block');
-      }
-    } catch (error) {
-      console.error('Database query error:', error.stack);
-      res.status(500).json({ error: 'Internal server error' });
-    }
+
+const joinBlock = async (req, res) => {
+  const { uid, bid } = req.body
+
+  if (!uid || !bid === null) {
+    return res.status(400).send({ error: 'Missing required fields' })
   }
+  try {
+    const result = await joinBlockHelper(uid, bid)
+    res.status(200).send(result)
+  } catch (error) {
+    console.error('Failed to add user to block membership voting table:', error)
+    res.status(500).send({ error: 'Internal server error' })
+  }
+}
+
+
+const blockFeedThreadsRecieved = async (req, res) => {
+  const { uid } = req.params;
+
+  try {
+    const findBlock = `
+      SELECT bid 
+      FROM memberships 
+      WHERE uid = $1`; 
+    const userResult = await pool.query(findBlock, [uid])
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).send('User not found or not associated with any block')
+    }
+
+    const blockId = userResult.rows[0].bid
+    const blockIdString = blockId.toString()
+
+    // Now fetch the threads for that block
+    const threadQuery = `
+      SELECT t.tid, t.subject, t.body, t.created, u.username
+      FROM threads t
+      JOIN users u ON t.uid = u.uid
+      WHERE 
+          t.uid != $1
+          AND receiverType = 'block'
+          AND receiver = $2
+      ORDER BY created DESC;
+    `;
+    const threadResult = await pool.query(threadQuery, [uid, blockIdString])
+
+    if (threadResult.rows.length > 0) {
+      res.status(200).json({ threads: threadResult.rows })
+    } else {
+      res.status(404).send('No received threads found for this block')
+    }
+  } catch (error) {
+    console.error('Database query error:', error.stack)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+}
+
 
   const blockFeedThreadsCreated = async (req, res) => {
     const { uid } = req.params;
@@ -1016,8 +1027,51 @@ const sendFriendRequest = async (req, res) => {
   }
   }
 
+  
+  const followedBlocksFeedThreadsRecieved = async (req, res) => {
+    const { uid } = req.params;
+  
+    try {
+      const findFollowedBlocks = `
+        SELECT bid 
+        FROM follow_blocks
+        WHERE uid = $1`; 
+      const followedBlocksResults = await pool.query(findFollowedBlocks, [uid])
+  
+      if (followedBlocksResults.rows.length === 0) {
+        return res.status(404).send('User has not currently following any blocks')
+      }
+  
+      const blockIds = followedBlocksResults.rows.map(row => row.bid);
+      const blockIdStrings = blockIds.map(id => `'${id}'`).join(', ');
+  
+      // Now fetch the threads for that block
+      const threadQuery = `
+        SELECT t.tid, t.subject, t.body, t.created, u.username, b.b_name, n.n_name
+        FROM threads t
+        JOIN users u ON t.uid = u.uid
+        JOIN memberships m ON t.uid = m.uid
+		    JOIN blocks b ON m.bid = b.bid
+		    JOIN neighborhoods n ON b.nid = n.nid
+        WHERE 
+            t.uid != $1
+            AND receiverType = 'block'
+            AND receiver IN (${blockIdStrings})
+        ORDER BY created DESC;
+      `;
 
-
+      const threadResult = await pool.query(threadQuery, [uid])
+  
+      if (threadResult.rows.length > 0) {
+        res.status(200).json({ threads: threadResult.rows })
+      } else {
+        res.status(404).send('No received threads found for this block')
+      }
+    } catch (error) {
+      console.error('Database query error:', error.stack)
+      res.status(500).json({ error: 'Internal server error' })
+    }
+  }
 
 
 
@@ -1038,17 +1092,17 @@ const sendFriendRequest = async (req, res) => {
 const joinBlockHelper = async (uid, bid) => {
     // First, check if there's already an entry for this uid
     const checkQuery = `
-        SELECT 1 FROM join_blocks WHERE uid = $1;
+      SELECT 1 
+      FROM join_blocks 
+      WHERE uid = $1;
     `;
 
     try {
         const checkResult = await pool.query(checkQuery, [uid])
         if (checkResult.rows.length > 0) {
-            // If an entry exists, throw an error
-            return{ message: 'User has already applied for a block' } 
+          return{ message: 'User has already applied for a block' } 
         }
 
-        // If no entry exists, proceed to insert
         const insertQuery = `
             INSERT INTO join_blocks (uid, bid)
             VALUES ($1, $2);
@@ -1061,75 +1115,6 @@ const joinBlockHelper = async (uid, bid) => {
         throw error
     }
 };
-
-const userSignupHelper = async (userData) => {
-    const { fname, lname, email, addrs1, addrs2, city, state, zip, username, pass ,location} = userData;
-    console.log(location)
-    
-    const query = `
-        INSERT INTO users (fname, lname, email, addrs1, addrs2, city, state, zip, username, pass, location)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-        RETURNING uid;
-    `;
-    /*
-    try {
-        const { rows } = await pool.query(query, [fname, lname, email, addrs1, addrs2, city, state, zip, username, pass, location]);
-        return rows[0].uid  // This returns the user ID of the newly created user
-    } catch (error) {
-        if (error.code === '23505') { // 23505 is the error code for unique_violation
-            if (error.detail.includes('username')){
-                throw new Error('Username already in use');
-            }
-            if (error.detail.includes('email')){
-                throw new Error('Email already in use')
-            }
-        }
-        throw error;
-        
-    }
-    */
-};
-
-// Helper function for updateProfile
-async function updateProfilesHelper(uid, f_desc, f_photo) {
-
-    let query = `
-        INSERT INTO user_profiles (uid, f_desc, f_photo)
-        VALUES ($1, $2, $3)
-        ON CONFLICT (uid) 
-        DO UPDATE SET 
-    `;
-
-    const updateParts = []
-    const values = [uid, f_desc, f_photo]
-
-    if (f_desc !== null) {
-        updateParts.push(`f_desc = $2`)
-    }
-
-    if (f_photo !== null) {
-        updateParts.push(`f_photo = $3`)
-    }
-
-    // Joining all parts of the update statement
-    if (updateParts.length > 0){
-        query += updateParts.join(', ')
-    } 
-    else {
-        // When there are no changes, no update occurs
-        query += ' f_desc = f_desc, f_photo = f_photo'
-    }
-
-
-    try {
-        const res = await pool.query(query, values)
-        console.log(`User profile processed. Rows affected: ${res.rowCount}`)
-        return res.rowCount
-    } catch (err){
-        console.log('Error processing user profile:', err)
-        throw err
-    }
-}
 
 
 module.exports = {
@@ -1165,6 +1150,7 @@ module.exports = {
     neighborsListThreadFetch,
     blockFetch,
     neighborhoodFetch,
+    followedBlocksFeedThreadsRecieved,
 
     
 }

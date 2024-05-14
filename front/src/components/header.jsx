@@ -10,6 +10,7 @@ function Header() {
       <NavLink to="/neighborsFeed">Neighbors</NavLink>
       <NavLink to="/blockFeed">Blocks</NavLink>
       <NavLink to="/neighborhoodFeed">Neighborhood</NavLink>
+      <NavLink to="/followedBlocksFeed">Followed Blocks</NavLink>
     </nav>
   );
 }
