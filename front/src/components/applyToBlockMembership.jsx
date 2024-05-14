@@ -54,7 +54,7 @@ function FindEligibleBlockForMembership({ onEligibleBlockApplied }) {
 
   return (
     <div className="follow-blocks">
-      <h2>Apply for Block Membership - </h2>
+      <h2>Apply for Block Membership - working w/ button</h2>
       <ul>
         {eligibleBlocks.map(block => (
           <li key={block.bid}>

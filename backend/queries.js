@@ -1088,13 +1088,22 @@ const sendFriendRequest = async (req, res) => {
         select uid 
         from join_blocks
         where uid = $1
+        ),
+        
+        t3 as (
+        select uid 
+        from memberships
+        where uid = $1
         )
         
         select t1.uid, b.bid, b.b_name, n.n_name, t1.location <-> b.location as distance
         from blocks b, t1, neighborhoods n
-        where b.nid = n.nid and t1.uid not in (select uid from t2)
+        where 
+          b.nid = n.nid 
+          and t1.uid not in (select uid from t2)
+          and t1.uid not in (select uid from t3)
         order by distance
-        limit 1`; 
+        limit 1`;
       
       const threadResult = await pool.query(findClosestEligibleBlock, [uid])
   
