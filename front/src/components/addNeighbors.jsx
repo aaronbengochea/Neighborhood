@@ -16,7 +16,13 @@ function FindNeighbors({onNeighborAdded}) {
       try {
         const res = await axios.get(`http://localhost:4000/findNeighbors/${uid}`);
         const neighborsData = res.data && res.data.threads ? res.data.threads : [];
-        setPotentialNeighbors(neighborsData);
+        if (res.data.message){
+          console.log(res.data.message)
+          setPotentialNeighbors([]);
+        } else {
+          setPotentialNeighbors(neighborsData);
+        }
+        
       } catch (error) {
         console.error('Failed to fetch potential neighbors:', error);
         setPotentialNeighbors([]);

@@ -42,6 +42,12 @@ app.get('/neighborsListThreadFetch/:uid', db.neighborsListThreadFetch)
 app.get('/blockFetch/:uid', db.blockFetch)
 app.get('/neighborhoodFetch/:uid', db.neighborhoodFetch)
 app.get('/followedBlocksFeedThreads/receivedFollowedBlocks/:uid', db.followedBlocksFeedThreadsRecieved)
+app.get('/findEligibleBlockForMembership/:uid', db.findEligibleBlockForMembership)
+app.post('/applyForBlockMembership', db.applyForBlockMembership)
+app.get('/findJoinedBlocksPendingFetch/:uid', db.findJoinedBlocksPendingFetch)
+
+
+
 
 
 app.get('/visit', (req, res) => {

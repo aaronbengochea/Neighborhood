@@ -9,6 +9,8 @@ import { FindNeighbors } from './addNeighbors'
 import { FindFriends } from './addFriends'
 import { FollowBlocks } from './followBlocks'
 import { FollowedBlocks } from './followedBlocks'
+import { FindEligibleBlockForMembership } from './applyToBlockMembership'
+import { JoinedBlocksPending } from './applyToBlockMembershipPending'
 import { Header } from './header';
 import './comp.css';
 
@@ -18,7 +20,8 @@ function Home() {
   const [reloadFriends, setReloadFriends] = useState(false);
   const [reloadPendingFriends, setReloadPendingFriends] = useState(false);
   const [reloadBlockFollowed, setReloadBlockFollowed] = useState(false);
-
+  const [reloadEligibleBlockApplied, setReloadEligibleBlockApplied] = useState(false);
+  
   const handleNeighborAdded = () => {
     setReloadNeighbors(prev => !prev); // Toggle the state to trigger reload
   };
@@ -35,6 +38,10 @@ function Home() {
     setReloadBlockFollowed(prev => !prev); // Toggle the state to trigger reload
   };
 
+  const handleEligibleBlockApplied = () => {
+    setReloadEligibleBlockApplied(prev => !prev); // Toggle the state to trigger reload
+  };
+
   const handleEditProfileClick = () => {
     navigate('/editUserProfile');
   };
@@ -48,9 +55,13 @@ function Home() {
         <FriendsList reloadTrigger={reloadFriends}/>
         <NeighborsList reloadTrigger={reloadNeighbors}/>
         <FollowedBlocks reloadTrigger={reloadBlockFollowed}/>
+        
         <FollowBlocks onBlockFollowed={handleBlockFollowed}/>
         <AcceptFriendRequests onFriendAccepted={handleFriendAccepted}/>
         <PendingFriendRequests reloadTrigger={reloadPendingFriends}/>
+        <JoinedBlocksPending reloadTrigger={reloadEligibleBlockApplied}/>
+        <FindEligibleBlockForMembership onEligibleBlockApplied={handleEligibleBlockApplied}/>
+        
         <MembershipVoting/>
         <FindNeighbors onNeighborAdded={handleNeighborAdded}/>
         <FindFriends onFriendRequestSent={handleFriendRequestSent}/>

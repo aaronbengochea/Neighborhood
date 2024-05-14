@@ -16,7 +16,12 @@ function AcceptFriendRequests({onFriendAccepted}) {
       try {
         const res = await axios.get(`http://localhost:4000/friendRequestsRecievedPending/${uid}`);
         const friendRequestsData = res.data && res.data.threads ? res.data.threads : [];
-        setRequests(friendRequestsData);
+        if (res.data.message){
+            console.log(res.data.message)
+            setRequests([]);
+        } else {
+          setRequests(friendRequestsData);
+        }
       } catch (error) {
         console.error('Failed to fetch friend requests:', error);
         setRequests([]);
@@ -45,7 +50,7 @@ function AcceptFriendRequests({onFriendAccepted}) {
 
   return (
     <div className="accept-friends">
-      <h2>Received Friend Requests - working w/ buttons</h2>
+      <h2>Friend Requests Received - working w/ buttons</h2>
       <ul>
         {requests.map(request => (
           <li key={request.username}>

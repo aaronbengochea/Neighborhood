@@ -16,8 +16,12 @@ function MembershipVoting() {
       try {
         const res = await axios.get(`http://localhost:4000/membershipSeekers/${uid}`);
         const membershipApplicants = res.data && res.data.threads ? res.data.threads : [];
-        console.log(membershipApplicants)
-        setApplicants(membershipApplicants);
+        if (res.data.message){
+          console.log(res.data.message)
+          setApplicants([]);
+        } else {
+          setApplicants(membershipApplicants);
+        }
       } catch (error) {
         console.error('Failed to fetch membership applicants:', error);
         setApplicants([]);

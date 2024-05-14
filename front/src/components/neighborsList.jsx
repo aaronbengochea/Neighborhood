@@ -13,7 +13,12 @@ function NeighborsList({reloadTrigger}) {
       try {
         const res = await axios.get(`http://localhost:4000/neighborsList/${uid}`);
         const neighborsData = res.data && res.data.threads ? res.data.threads : [];
-        setNeighbors(neighborsData);
+        if (res.data.message){
+          console.log(res.data.message)
+          setNeighbors([]);
+        } else {
+          setNeighbors(neighborsData);
+        }
       } catch (error) {
         console.error('Failed to fetch neighbors:', error);
         setNeighbors([]);

@@ -16,7 +16,13 @@ function PendingFriendRequests({reloadTrigger}) {
       try {
         const res = await axios.get(`http://localhost:4000/friendRequestsSentPending/${uid}`);
         const friendRequestsData = res.data && res.data.threads ? res.data.threads : [];
-        setRequests(friendRequestsData);
+        if (res.data.message){
+          console.log(res.data.message)
+          setRequests([]);
+        } else {
+          setRequests(friendRequestsData);
+        }
+        
       } catch (error) {
         console.error('Failed to fetch pending friend requests:', error);
         setRequests([]);
@@ -28,7 +34,7 @@ function PendingFriendRequests({reloadTrigger}) {
 
   return (
     <div className="pending-friends">
-      <h2>Pending Friend Requests</h2>
+      <h2>Friend Request Sent</h2>
       <ul>
         {requests.map(request => (
           <li key={request.username}>

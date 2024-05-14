@@ -13,7 +13,12 @@ function FollowedBlocksFeed() {
     const fetchThreads = async () => {
       try {
         const res = await axios.get(`http://localhost:4000/followedBlocksFeedThreads/receivedFollowedBlocks/${uid}`) // Adjusted endpoint
-        setThreads(res.data.threads)
+        if (res.data.message){
+            console.log(res.data.message)
+            setThreads([])
+          } else {
+            setThreads(res.data.threads);
+          }
       } catch (error) {
         console.error('Failed to fetch threads:', error.response.data)
         setThreads([])

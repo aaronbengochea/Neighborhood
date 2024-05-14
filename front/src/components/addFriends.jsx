@@ -16,7 +16,13 @@ function FindFriends({ onFriendRequestSent }) {
       try {
         const res = await axios.get(`http://localhost:4000/findFriends/${uid}`);
         const friendsData = res.data && res.data.threads ? res.data.threads : [];
-        setPotentialFriends(friendsData);
+        if (res.data.message){
+          console.log(res.data.message)
+          setPotentialFriends([]);
+        } else {
+          setPotentialFriends(friendsData);
+        }
+        
       } catch (error) {
         console.error('Failed to fetch potential friends:', error);
         setPotentialFriends([]);

@@ -13,7 +13,12 @@ function FriendsList({reloadTrigger}) {
       try {
         const res = await axios.get(`http://localhost:4000/friendsList/${uid}`);
         const friendsData = res.data && res.data.threads ? res.data.threads : [];
-        setFriends(friendsData);
+        if (res.data.message){
+          console.log(res.data.message)
+          setFriends([]);
+        } else {
+          setFriends(friendsData);
+        }
       } catch (error) {
         console.error('Failed to fetch friends:', error);
         setFriends([]);

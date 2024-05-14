@@ -17,13 +17,18 @@ function Signin() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const url = 'http://localhost:4000/userSignin'; // Adjust this URL to where your server is hosted and the correct endpoint
-
-    console.log(formData)
+    
     try {
       const res = await axios.post(url, formData);
-      console.log('Sign in successful:', res.data);
-      localStorage.setItem('uid', res.data.uid)
-      navigate('/home')
+      if (res.data.message){
+        console.log(res.data.message)
+
+      } else {
+        console.log('Sign in successful:', res.data);
+        localStorage.setItem('uid', res.data.uid)
+        navigate('/home')
+      }
+      
       // Handle successful sign in, e.g., storing auth tokens, redirecting, etc.
     } catch (err) {
       console.error('Error during sign in:', err.response ? err.response.data : err);

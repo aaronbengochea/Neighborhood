@@ -59,7 +59,7 @@ const userSignin = async (req, res) => {
     if (result.rows.length > 0) {
       res.status(200).json({ uid: result.rows[0].uid })
     } else {
-      res.status(404).json({ error: 'Invalid credentials' })
+      res.status(200).json({ message: 'Error: Invalid credentials' })
     }
   } catch (error) {
     console.error('Database query error', error.stack);
@@ -78,9 +78,9 @@ const userSignup = async (req, res) => {
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
       RETURNING uid;
     `;
-    const res = await pool.query(userSignupQuery, [fname, lname, email, addrs1, addrs2, city, state, zip, username, pass ,location]);
-    
-    res.status(201).send({res: uid, message: 'User successfully created' })
+    const result = await pool.query(userSignupQuery, [fname, lname, email, addrs1, addrs2, city, state, zip, username, pass ,location]);
+    const uid = result.rows[0].uid
+    res.status(201).send({uid: uid, message: 'User successfully created' })
 
   } catch (error) {
     if (error.message === 'Username already in use') {
@@ -122,7 +122,7 @@ const blockFeedThreadsRecieved = async (req, res) => {
     const userResult = await pool.query(findBlock, [uid])
 
     if (userResult.rows.length === 0) {
-      return res.status(404).send('User not found or not associated with any block')
+      return res.status(200).json({ message: 'Block Feed Received Threads: User is currently not a member of a block' })
     }
 
     const blockId = userResult.rows[0].bid
@@ -144,7 +144,7 @@ const blockFeedThreadsRecieved = async (req, res) => {
     if (threadResult.rows.length > 0) {
       res.status(200).json({ threads: threadResult.rows })
     } else {
-      res.status(404).send('No received threads found for this block')
+      res.status(200).json({ message: 'Block Feed Received Threads: User has not received any threads associated with their corresponding block' })
     }
   } catch (error) {
     console.error('Database query error:', error.stack)
@@ -164,7 +164,7 @@ const blockFeedThreadsRecieved = async (req, res) => {
       const userResult = await pool.query(findBlock, [uid]);
   
       if (userResult.rows.length === 0) {
-        return res.status(404).send('User not found or not associated with any block');
+        return res.status(200).json({ message: 'Block Feed Created Threads: User is currently not a member of a block' })
       }
   
       const blockId = userResult.rows[0].bid;
@@ -186,7 +186,7 @@ const blockFeedThreadsRecieved = async (req, res) => {
       if (threadResult.rows.length > 0) {
         res.status(200).json({ threads: threadResult.rows });
       } else {
-        res.status(404).send('No created threads found for this block');
+        res.status(200).json({ message: 'Block Feed Created Threads: User has not created any threads associated with their corresponding block' })
       }
     } catch (error) {
       console.error('Database query error:', error.stack);
@@ -207,7 +207,7 @@ const blockFeedThreadsRecieved = async (req, res) => {
     const userResult = await pool.query(findNeighborhood, [uid]);
 
     if (userResult.rows.length === 0) {
-      return res.status(404).send('User not found or not associated with any neighborhood');
+      return res.status(200).json({ message: 'Neighborhood Feed Received Threads: User is currently not a member of a neighborhood or block' })
     }
 
     const neighborhoodId = userResult.rows[0].nid;
@@ -227,7 +227,7 @@ const blockFeedThreadsRecieved = async (req, res) => {
     if (threadResult.rows.length > 0) {
       res.status(200).json({ threads: threadResult.rows });
     } else {
-      res.status(404).send('No received threads found for this neighborhood');
+      res.status(200).json({ message: 'Neighborhood Feed Received Threads: User has not received any threads associated with their corresponding neighborhood'})
     }
   } catch (error) {
     console.error('Database query error:', error.stack);
@@ -248,7 +248,7 @@ const neighborhoodFeedThreadsCreated = async (req, res) => {
         const userResult = await pool.query(findNeighborhood, [uid]);
 
         if (userResult.rows.length === 0) {
-        return res.status(404).send('User not found or not associated with any neighborhood');
+        return res.status(200).json({ message: 'Neighborhood Feed Created Threads: User is currently not a member of a neighborhood or block' })
         }
 
         const neighborhoodId = userResult.rows[0].nid;
@@ -268,7 +268,7 @@ const neighborhoodFeedThreadsCreated = async (req, res) => {
         if (threadResult.rows.length > 0) {
         res.status(200).json({ threads: threadResult.rows });
         } else {
-        res.status(404).send('No created threads found for this neighborhood');
+        res.status(200).json({ message: 'Neighborhood Feed Created Threads: User has not created any threads associated with their corresponding neighborhood'})
         }
     } catch (error) {
         console.error('Database query error:', error.stack);
@@ -307,7 +307,7 @@ const friendsFeedThreadsRecieved = async (req, res) => {
     if (threadResult.rows.length > 0) {
       res.status(200).json({ threads: threadResult.rows });
     } else {
-      res.status(404).send('No received friend threads found for this user');
+      res.status(200).json({ message: 'Friends Feed Received Threads: User has not received any threads from friends' });
     }
   } catch (error) {
     console.error('Database query error:', error.stack);
@@ -335,7 +335,7 @@ const friendsFeedThreadsCreated = async (req, res) => {
     if (threadResult.rows.length > 0) {
       res.status(200).json({ threads: threadResult.rows });
     } else {
-      res.status(404).send('No created friend threads found for this user');
+      res.status(200).json({ message: 'Friends Feed Created Threads: User has not created any threads for friends' });
     }
   } catch (error) {
     console.error('Database query error:', error.stack);
@@ -362,7 +362,7 @@ try {
   if (threadResult.rows.length > 0) {
     res.status(200).json({ threads: threadResult.rows });
   } else {
-    res.status(404).send('No received neighbors threads found for this user');
+    res.status(200).json({message: 'Neighbors Feed Received Threads: User has not received any threads from neighbors'});
   }
 } catch (error) {
   console.error('Database query error:', error.stack);
@@ -390,7 +390,7 @@ try {
   if (threadResult.rows.length > 0) {
     res.status(200).json({ threads: threadResult.rows });
   } else {
-    res.status(404).send('No created neighbors threads found for this user');
+    res.status(200).json({message: 'Neighbors Feed Created Threads: User has not created any threads for neighbors'});
   }
 } catch (error) {
   console.error('Database query error:', error.stack);
@@ -432,7 +432,7 @@ try {
     console.log(threadResult.rows)
     res.status(200).json({ threads: threadResult.rows });
   } else {
-    res.status(404).send('No created neighbors threads found for this user');
+    res.status(200).json({message: 'Friends List: Friends list is empty'});
   }
 } catch (error) {
   console.error('Database query error:', error.stack);
@@ -462,7 +462,7 @@ try {
     console.log(threadResult.rows)
     res.status(200).json({ threads: threadResult.rows });
   } else {
-    res.status(404).send('No created neighbors threads found for this user');
+    res.status(200).json({ message: 'Neighbor List: Neighbors list is empty' });
   }
 } catch (error) {
   console.error('Database query error:', error.stack);
@@ -494,7 +494,7 @@ try {
     console.log(threadResult.rows)
     res.status(200).json({ threads: threadResult.rows });
   } else {
-    res.status(404).send('No created neighbors threads found for this user');
+    res.status(200).json({message: 'Recieved Friend Requests: User has no pending friend requests'});
   }
 } catch (error) {
   console.error('Database query error:', error.stack);
@@ -524,7 +524,7 @@ try {
     console.log(threadResult.rows)
     res.status(200).json({ threads: threadResult.rows });
   } else {
-    res.status(404).send('No created neighbors threads found for this user');
+    res.status(200).json({ message: 'Friend Request Sent: User has no pending friend request to be accepted' });
   }
 } catch (error) {
   console.error('Database query error:', error.stack);
@@ -568,7 +568,7 @@ try {
     console.log(threadResult.rows)
     res.status(200).json({ threads: threadResult.rows });
   } else {
-    res.status(404).send('No created neighbors threads found for this user');
+    res.status(200).json({message: 'Membership Voting: Either no one to vote for or user is not a member of a block yet'});
   }
 } catch (error) {
   console.error('Database query error:', error.stack);
@@ -607,7 +607,7 @@ try {
     console.log(threadResult.rows)
     res.status(200).json({ threads: threadResult.rows });
   } else {
-    res.status(404).send('No neighbors found for this user');
+    res.status(200).json({message: 'Add To Neighbors List: User must be part of a block in order to find neighbors. User is either not part of a block or has already added all potential neighbors'});
   }
 } catch (error) {
   console.error('Database query error:', error.stack);
@@ -796,7 +796,7 @@ try {
     console.log(threadResult.rows)
     res.status(200).json({ threads: threadResult.rows });
   } else {
-    res.status(404).send('No neighbors found for this user');
+    res.status(200).json({ message: 'Find Friends: User has already added or sent friend request to all available users' });
   }
 } catch (error) {
   console.error('Database query error:', error.stack);
@@ -853,7 +853,7 @@ const sendFriendRequest = async (req, res) => {
       console.log(threadResult.rows)
       res.status(200).json({ threads: threadResult.rows });
     } else {
-      res.status(404).send('No neighbors found for this user');
+      res.status(200).json({ message: 'Follow Blocks: User has already followed all available blocks' });
     }
   } catch (error) {
     console.error('Database query error:', error.stack);
@@ -897,7 +897,7 @@ const sendFriendRequest = async (req, res) => {
       console.log(threadResult.rows)
       res.status(200).json({ threads: threadResult.rows });
     } else {
-      res.status(404).send('No neighbors found for this user');
+      res.status(200).json({ message: 'Followed Blocks: User is currently not following any blocks' });
     }
   } catch (error) {
     console.error('Database query error:', error.stack);
@@ -1039,7 +1039,7 @@ const sendFriendRequest = async (req, res) => {
       const followedBlocksResults = await pool.query(findFollowedBlocks, [uid])
   
       if (followedBlocksResults.rows.length === 0) {
-        return res.status(404).send('User has not currently following any blocks')
+        return res.status(200).json({message:'Followed Blocks Feed: User has not followed any blocks'})
       }
   
       const blockIds = followedBlocksResults.rows.map(row => row.bid);
@@ -1065,7 +1065,7 @@ const sendFriendRequest = async (req, res) => {
       if (threadResult.rows.length > 0) {
         res.status(200).json({ threads: threadResult.rows })
       } else {
-        res.status(404).send('No received threads found for this block')
+        res.status(200).json({message:'Followed Blocks Feed: No threads have been posted to any of the blocks the user follows'})
       }
     } catch (error) {
       console.error('Database query error:', error.stack)
@@ -1073,10 +1073,84 @@ const sendFriendRequest = async (req, res) => {
     }
   }
 
+  const findEligibleBlockForMembership = async (req, res) => {
+    const { uid } = req.params;
+  
+    try {
+      const findClosestEligibleBlock = `
+      with t1 as (
+        select uid, location from users
+        where uid = $1
+        order by uid desc
+        ),
+        
+        t2 as (
+        select uid 
+        from join_blocks
+        where uid = $1
+        )
+        
+        select t1.uid, b.bid, b.b_name, n.n_name, t1.location <-> b.location as distance
+        from blocks b, t1, neighborhoods n
+        where b.nid = n.nid and t1.uid not in (select uid from t2)
+        order by distance
+        limit 1`; 
+      
+      const threadResult = await pool.query(findClosestEligibleBlock, [uid])
+  
+      if (threadResult.rows.length > 0) {
+        res.status(200).json({ threads: threadResult.rows })
+      } else {
+        res.status(200).json({ message: 'Apply Block Membership: User has already applied and is pending approval or is already a member of a block' })
+      }
+    } catch (error) {
+      console.error('Database query error:', error.stack)
+      res.status(500).json({ error: 'Internal server error' })
+    }
+  }
 
+  const applyForBlockMembership = async (req, res) => {
+    const { uid, bid } = req.body;
+  
+    try {
+      const insertQuery = `
+        INSERT INTO join_blocks (uid, bid)
+        VALUES ($1, $2)
+      `;
+      const result = await pool.query(insertQuery, [uid, bid]);
+      res.status(201).json(result.rows[0]);
+    } catch (error) {
+      console.error('Error creating thread:', error.stack);
+      res.status(500).send('Failed to create thread');
+    }
+  }
 
-
-
+  
+  const findJoinedBlocksPendingFetch = async (req, res) => {
+    const { uid } = req.params;
+  
+  try {
+  
+    const joinedBlocksPending = `
+      select j.bid, b.b_name, n.n_name
+      from join_blocks j
+      join blocks b on j.bid = b.bid
+      join neighborhoods n on b.nid = n.nid
+      where uid = $1
+    `;
+    const threadResult = await pool.query(joinedBlocksPending, [uid]);
+  
+    if (threadResult.rows.length > 0) {
+      console.log(threadResult.rows)
+      res.status(200).json({ threads: threadResult.rows });
+    } else {
+      res.status(200).json({ message: 'Block Membership Application Pending: User does not have a pending block membership application currently'});
+    }
+  } catch (error) {
+    console.error('Database query error:', error.stack);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+  }
 
 
 
@@ -1151,6 +1225,9 @@ module.exports = {
     blockFetch,
     neighborhoodFetch,
     followedBlocksFeedThreadsRecieved,
+    findEligibleBlockForMembership,
+    applyForBlockMembership,
+    findJoinedBlocksPendingFetch,
 
     
 }
