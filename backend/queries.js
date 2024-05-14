@@ -4,16 +4,21 @@ const updateProfile = async (req, res) => {
   const { uid, addrs1, addrs2, city, state, zip, location, f_desc, f_photo } = req.body;
   
   try {
-    // Update the users table
     const updateUserQuery = `
       UPDATE users
       SET addrs1 = $1, addrs2 = $2, city = $3, state = $4, zip = $5, location = $6
-      WHERE uid = $7;
+      WHERE uid = $7
     `;
     await pool.query(updateUserQuery, [addrs1, addrs2, city, state, zip, location, uid]);
 
-    // Check if user has a profile in user_profiles
-    const profileCheckResult = await pool.query('SELECT * FROM user_profiles WHERE uid = $1;', [uid]);
+
+    const profileCheckQuery = `
+      UPDATE users
+      SET addrs1 = $1, addrs2 = $2, city = $3, state = $4, zip = $5, location = $6
+      WHERE uid = $7
+    `;
+
+    const profileCheckResult = await pool.query(profileCheckQuery, [uid]);
 
     if (profileCheckResult.rows.length > 0) {
       // Update user_profiles table
