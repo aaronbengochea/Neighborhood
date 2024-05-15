@@ -53,7 +53,7 @@ function AcceptFriendRequests({onFriendAccepted}) {
       <ul>
         {requests.map(request => (
           <li key={request.username}>
-            <span>{request.username} ----- {request.b_name} ({request.request_time})</span>
+            <span>{request.username} - {request.b_name} --- {new Date(request.request_time).toLocaleString()} --- </span>
             <button className="accept-button" onClick={() => acceptRequest(request.uid)}>Accept</button>
           </li>
         ))}

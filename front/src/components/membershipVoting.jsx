@@ -58,7 +58,7 @@ function MembershipVoting() {
       <ul>
         {applicants.map(applicant => (
           <li key={applicant.uid}>
-            <span>{applicant.username} ({applicant.b_name})</span>
+            <span>{applicant.username} - {applicant.b_name} - {applicant.n_name} --- </span>
             <button className="accept-button" onClick={() => handleVote(applicant.uid, applicant.bid)}>Accept</button>
           </li>
         ))}

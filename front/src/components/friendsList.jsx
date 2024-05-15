@@ -12,11 +12,16 @@ function FriendsList({reloadTrigger}) {
 
       try {
         const res = await axios.get(`http://localhost:4000/friendsList/${uid}`);
-        const friendsData = res.data && res.data.threads ? res.data.threads : [];
+        let friendsData = res.data && res.data.threads ? res.data.threads : [];
         if (res.data.message){
           console.log(res.data.message)
           setFriends([]);
         } else {
+          friendsData = friendsData.map(friend => ({
+            ...friend,
+            b_name: friend.b_name === null ? 'No Block' : friend.b_name
+          }));
+          
           setFriends(friendsData);
         }
       } catch (error) {

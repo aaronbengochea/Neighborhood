@@ -54,7 +54,7 @@ function FindFriends({ onFriendRequestSent }) {
 
   return (
     <div className="friends-list">
-      <h2>Find Friends - working w/buttons</h2>
+      <h2>Find Friends</h2>
       <ul>
         {potentialFriends.map(friend => (
           <li key={friend.uid}>

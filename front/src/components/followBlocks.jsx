@@ -57,7 +57,7 @@ function FollowBlocks({ onBlockFollowed }) {
       <ul>
         {blocks.map(block => (
           <li key={block.bid}>
-            <span>{block.b_name} in {block.n_name} ----- </span>
+            <span>{block.b_name} - {block.n_name} --- </span>
             <button className="follow-button" onClick={() => followBlock(block.bid)}>Follow</button>
           </li>
         ))}

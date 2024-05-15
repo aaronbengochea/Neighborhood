@@ -33,7 +33,7 @@ function MembershipStatusList() {
       <h2>Membership Status</h2>
       <ul>
         {memberships.map(membership => (
-          <li key={membership.bid}>Block: {membership.b_name} ----- Neighborhood: {membership.n_name}</li>
+          <li key={membership.bid}>{membership.b_name} - {membership.n_name}</li>
         ))}
       </ul>
     </div>

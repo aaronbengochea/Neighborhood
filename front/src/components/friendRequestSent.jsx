@@ -38,7 +38,7 @@ function PendingFriendRequests({reloadTrigger}) {
       <ul>
         {requests.map(request => (
           <li key={request.username}>
-            <span>{request.username} ----- ({request.request_time})</span>
+            <span>{request.username} ----- {new Date(request.request_time).toLocaleString()}</span>
             
             {/*<button className="revoke-button">Revoke</button>*/}
             

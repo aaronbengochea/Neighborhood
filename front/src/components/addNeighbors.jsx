@@ -39,13 +39,12 @@ function FindNeighbors({onNeighborAdded}) {
       console.error('No UID found in localStorage');
       return;
     }
-    console.log(typeof uid, typeof neighborUid)
+
     try {
       const res = await axios.post('http://localhost:4000/addNeighborsToList', {
         uid,
         neighborUid
       });
-      console.log(res.data.message);
 
       onNeighborAdded()
       setPotentialNeighbors(potentialNeighbors.filter(n => n.uid !== neighborUid));

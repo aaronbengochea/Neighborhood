@@ -556,13 +556,14 @@ try {
       where uid = $1
       )
       
-      select j.uid, j.bid, u.username, b.b_name 
-      from join_blocks j, users u, blocks b
+      select j.uid, j.bid, u.username, b.b_name, n.n_name
+      from join_blocks j, users u, blocks b, neighborhoods n
       where 
         j.bid in (select * from t2)
         and j.uid not in (select * from t1)
         and u.uid = j.uid
         and j.bid = b.bid
+        and b.nid = n.nid
   `;
   const threadResult = await pool.query(neighborsListFetchQuery, [uid]);
 
