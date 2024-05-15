@@ -33,13 +33,15 @@ function PendingFriendRequests({reloadTrigger}) {
   }, [reloadTrigger]);
 
   return (
-    <div className="pending-friends">
+    <div className="friends-list">
       <h2>Friend Request Sent</h2>
       <ul>
         {requests.map(request => (
           <li key={request.username}>
             <span>{request.username} ----- ({request.request_time})</span>
-            <button className="revoke-button">Revoke</button>
+            
+            {/*<button className="revoke-button">Revoke</button>*/}
+            
           </li>
         ))}
       </ul>

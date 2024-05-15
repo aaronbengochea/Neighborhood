@@ -174,7 +174,7 @@ function CreateThread() {
           <label>Body:</label>
           <textarea name="body" value={formData.body} onChange={handleChange} maxLength="255" rows="10" required />
         </div>
-        <button type="submit">Submit</button>
+        <button className={`filter-button all`} type="submit">Submit</button>
       </form>
     </div>
   </div>

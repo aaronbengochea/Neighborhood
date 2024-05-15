@@ -112,7 +112,7 @@ function Register() {
             <input type="password" name="pass" value={formData.pass} onChange={handleChange} required />
           </label>
         </div>
-        <button type="submit" className='button'>Register</button>
+        <button className={`filter-button all`} type="submit" >Register</button>
       </form>
     </div>
   );

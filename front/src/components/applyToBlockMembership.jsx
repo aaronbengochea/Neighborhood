@@ -53,7 +53,7 @@ function FindEligibleBlockForMembership({ onEligibleBlockApplied }) {
   };
 
   return (
-    <div className="follow-blocks">
+    <div className="friends-list">
       <h2>Apply for Block Membership - working w/ button</h2>
       <ul>
         {eligibleBlocks.map(block => (

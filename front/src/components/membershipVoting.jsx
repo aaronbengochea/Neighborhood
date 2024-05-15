@@ -53,7 +53,7 @@ function MembershipVoting() {
   };
 
   return (
-    <div className="membership-voting">
+    <div className="friends-list">
       <h2>Membership Voting - working w/button + updating membership if needed</h2>
       <ul>
         {applicants.map(applicant => (

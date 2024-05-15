@@ -52,7 +52,7 @@ function FollowBlocks({ onBlockFollowed }) {
   };
 
   return (
-    <div className="follow-blocks">
+    <div className="friends-list">
       <h2>Follow Blocks - working w/ buttons</h2>
       <ul>
         {blocks.map(block => (

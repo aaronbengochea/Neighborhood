@@ -45,8 +45,10 @@ app.get('/followedBlocksFeedThreads/receivedFollowedBlocks/:uid', db.followedBlo
 app.get('/findEligibleBlockForMembership/:uid', db.findEligibleBlockForMembership)
 app.post('/applyForBlockMembership', db.applyForBlockMembership)
 app.get('/findJoinedBlocksPendingFetch/:uid', db.findJoinedBlocksPendingFetch)
-
-
+app.get('/thread/:tid', db.singleThreadFetch)
+app.get('/threadMessages/:tid', db.singleThreadMessagesFetch)
+app.post('/postMessage/:tid', db.postMessage)
+app.get('/membershipStatus/:uid', db.membershipStatus)
 
 
 

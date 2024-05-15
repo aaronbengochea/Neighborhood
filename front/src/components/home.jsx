@@ -11,6 +11,7 @@ import { FollowBlocks } from './followBlocks'
 import { FollowedBlocks } from './followedBlocks'
 import { FindEligibleBlockForMembership } from './applyToBlockMembership'
 import { JoinedBlocksPending } from './applyToBlockMembershipPending'
+import { MembershipStatusList } from './membershipList'
 import { Header } from './header';
 import './comp.css';
 
@@ -50,21 +51,27 @@ function Home() {
     <div>
       <Header />
       <h1>Home</h1>
+      <div className='button-container'>
+        <button className={`filter-button all`} onClick={handleEditProfileClick}>Edit User Profile</button>
+      </div>
       <div className="list-container">
-      <button onClick={handleEditProfileClick}>Edit User Profile</button>
-        <FriendsList reloadTrigger={reloadFriends}/>
+        <h2>Neighbors</h2>
         <NeighborsList reloadTrigger={reloadNeighbors}/>
-        <FollowedBlocks reloadTrigger={reloadBlockFollowed}/>
-        
-        <FollowBlocks onBlockFollowed={handleBlockFollowed}/>
+        <FindNeighbors onNeighborAdded={handleNeighborAdded}/>
+        <h2>Friends</h2>
+        <FriendsList reloadTrigger={reloadFriends}/>
         <AcceptFriendRequests onFriendAccepted={handleFriendAccepted}/>
         <PendingFriendRequests reloadTrigger={reloadPendingFriends}/>
+        <FindFriends onFriendRequestSent={handleFriendRequestSent}/>
+        <h2>Follow Blocks</h2>
+        <FollowedBlocks reloadTrigger={reloadBlockFollowed}/>
+        <FollowBlocks onBlockFollowed={handleBlockFollowed}/>
+        <h2>Block Membership Application + Voting</h2>
+        <MembershipStatusList/>
         <JoinedBlocksPending reloadTrigger={reloadEligibleBlockApplied}/>
         <FindEligibleBlockForMembership onEligibleBlockApplied={handleEligibleBlockApplied}/>
-        
         <MembershipVoting/>
-        <FindNeighbors onNeighborAdded={handleNeighborAdded}/>
-        <FindFriends onFriendRequestSent={handleFriendRequestSent}/>
+        
       </div>
     </div>
   );

@@ -34,11 +34,10 @@ function AcceptFriendRequests({onFriendAccepted}) {
     const acceptRequest = async (senderUid) => {
         const uid = localStorage.getItem('uid');
         try {
-        const res = await axios.post('http://localhost:4000/acceptFriendRequest', {
+          await axios.post('http://localhost:4000/acceptFriendRequest', {
             uid,
             senderUid
         });
-        console.log(res.data.message);
 
         // Update the state to reflect the accepted request
         onFriendAccepted()
@@ -49,7 +48,7 @@ function AcceptFriendRequests({onFriendAccepted}) {
     };
 
   return (
-    <div className="accept-friends">
+    <div className="friends-list">
       <h2>Friend Requests Received - working w/ buttons</h2>
       <ul>
         {requests.map(request => (

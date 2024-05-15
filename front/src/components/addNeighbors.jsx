@@ -55,12 +55,11 @@ function FindNeighbors({onNeighborAdded}) {
   };
 
   return (
-    <div className="find-neighbors">
+    <div className="neighbors-list">
       <h2>Add Neighbors to Neighbor List - working w/ button</h2>
       <ul>
         {potentialNeighbors.map(neighbor => (
-          <li key={neighbor.username}>
-            <span>{neighbor.username} ----- {neighbor.b_name} ----- </span>
+          <li key={neighbor.username}> {neighbor.username} ----- {neighbor.b_name}
             <button className="add-button" onClick={() => addNeighbor(neighbor.uid)}>Add Neighbor</button>
           </li>
         ))}

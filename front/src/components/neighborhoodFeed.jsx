@@ -6,7 +6,10 @@ import './comp.css';
 
 function NeighborhoodFeed() {
   const [threads, setThreads] = useState([]);
-  const [showCreated, setShowCreated] = useState(false); // Toggle state
+  const [filteredThreads, setFilteredThreads] = useState([]);
+  const [showCreated, setShowCreated] = useState(false); 
+  const [searchQuery, setSearchQuery] = useState(''); 
+  const [filter, setFilter] = useState('all'); 
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -18,20 +21,50 @@ function NeighborhoodFeed() {
     const fetchThreads = async () => {
       try {
         const res = await axios.get(`http://localhost:4000/neighborhoodFeedThreads/${endpoint}`);
-        if (res.data.message){
-          console.log(res.data.message)
-          setThreads([])
+        if (res.data.message) {
+          console.log(res.data.message);
+          setThreads([]);
+          setFilteredThreads([]);
         } else {
           setThreads(res.data.threads);
+          setFilteredThreads(res.data.threads); // Initialize filteredThreads with fetched data
         }
       } catch (error) {
         console.error('Failed to fetch threads:', error.response.data);
-        setThreads([])
+        setThreads([]);
+        setFilteredThreads([]);
       }
     };
 
     fetchThreads();
   }, [showCreated]);
+
+  useEffect(() => {
+    const filterThreads = () => {
+      let filtered = threads;
+
+      if (searchQuery) {
+        const lowercasedQuery = searchQuery.toLowerCase();
+        filtered = filtered.filter(thread =>
+          thread.username.toLowerCase().includes(lowercasedQuery) ||
+          thread.body.toLowerCase().includes(lowercasedQuery)
+        );
+      }
+
+      const now = new Date();
+      if (filter === 'week') {
+        const oneWeekAgo = new Date(now.setDate(now.getDate() - 7));
+        filtered = filtered.filter(thread => new Date(thread.created) >= oneWeekAgo);
+      } else if (filter === 'month') {
+        const oneMonthAgo = new Date(now.setMonth(now.getMonth() - 1));
+        filtered = filtered.filter(thread => new Date(thread.created) >= oneMonthAgo);
+      }
+
+      setFilteredThreads(filtered);
+    };
+
+    filterThreads();
+  }, [searchQuery, filter, threads]);
 
   return (
     <div>
@@ -45,8 +78,20 @@ function NeighborhoodFeed() {
           Create Thread
         </button>
       </div>
+      <div className='button-container'> 
+      <input
+          type="text"
+          placeholder="Search by username or thread body..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="search-bar"
+        />
+        <button className={`filter-button ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>All</button>
+        <button className={`filter-button ${filter === 'week' ? 'active' : ''}`} onClick={() => setFilter('week')}>Past Week</button>
+        <button className={`filter-button ${filter === 'month' ? 'active' : ''}`} onClick={() => setFilter('month')}>Past Month</button>
+      </div>
       <div className="thread-list">
-        {threads.map(thread => (
+        {filteredThreads.map(thread => (
           <div key={thread.tid} className="thread-card" onClick={() => navigate(`/threads/${thread.tid}`)}>
             <h2>{thread.subject} - <small>{showCreated ? `Sent to Neighborhood` : `Posted by ${thread.username}`}</small></h2>
             <p className="thread-body">{thread.body}</p>

@@ -57,6 +57,13 @@ const userSignin = async (req, res) => {
     const result = await pool.query(checkUserPassword, [email, password])
 
     if (result.rows.length > 0) {
+      const uid = result.rows[0].uid
+      const addUserLog = `
+        INSERT INTO user_logs (uid, last_login)
+        values ($1, now())
+      `
+      await pool.query(addUserLog,[uid])
+
       res.status(200).json({ uid: result.rows[0].uid })
     } else {
       res.status(200).json({ message: 'Error: Invalid credentials' })
@@ -406,25 +413,23 @@ const friendsListFetch = async (req, res) => {
 try {
 
   const friendsListFetchQuery = `
-      WITH t1 AS (
-        SELECT 
-        CASE 
-          WHEN f1 = $1 THEN f2  
-          ELSE f1              
-        END AS friend_id
-        FROM friends
-        WHERE 
-        (f1 = $1 OR f2 = $1)    
-        AND accepted = true 
-      )
-      
-      SELECT u.username, b.b_name
-      FROM t1, users u, memberships m, blocks b
+    WITH t1 AS (
+      SELECT 
+      CASE 
+        WHEN f1 = $1 THEN f2  
+        ELSE f1              
+      END AS friend_id
+      FROM friends
       WHERE 
-        u.uid = t1.friend_id
-        AND u.uid = m.uid
-        AND m.bid = b.bid
-      ORDER BY username asc
+      (f1 = $1 OR f2 = $1)    
+      AND accepted = true 
+    )
+
+  select u.username, b.b_name 
+  from t1
+  join users u on t1.friend_id = u.uid
+  left join memberships m on u.uid = m.uid
+  left join blocks b on m.bid = b.bid
   `;
   const threadResult = await pool.query(friendsListFetchQuery, [uid]);
 
@@ -539,27 +544,24 @@ const prospectiveMembersFetch = async (req, res) => {
 try {
 
   const neighborsListFetchQuery = `
-      with t1 as (
-        select bid
-        from memberships
-        where uid = $1
+    with t1 as (
+      select joiner 
+      from join_block_votes j
+      where voter = $1
       ),
       
       t2 as (
-        select j.uid, j.bid 
-        from join_blocks j, join_block_votes v, t1
-        where 
-          j.bid = t1.bid
-          and v.voter = $1
-          and v.joiner = j.uid
+      select bid 
+      from memberships
+      where uid = $1
       )
       
-      select j.uid, j.bid, u.username, b.b_name
-      from join_blocks j, t2, users u, blocks b
+      select j.uid, j.bid, u.username, b.b_name 
+      from join_blocks j, users u, blocks b
       where 
-        j.bid = t2.bid
-        and t2.uid != j.uid
-        and j.uid = u.uid
+        j.bid in (select * from t2)
+        and j.uid not in (select * from t1)
+        and u.uid = j.uid
         and j.bid = b.bid
   `;
   const threadResult = await pool.query(neighborsListFetchQuery, [uid]);
@@ -567,7 +569,7 @@ try {
   if (threadResult.rows.length > 0) {
     console.log(threadResult.rows)
     res.status(200).json({ threads: threadResult.rows });
-  } else {
+  } else if (threadResult.rows.length === 0) {
     res.status(200).json({message: 'Membership Voting: Either no one to vote for or user is not a member of a block yet'});
   }
 } catch (error) {
@@ -747,8 +749,8 @@ const createThread = async (req, res) => {
             await pool.query(deleteJoinBlockQuery, [joiner]);
 
             const insertMembershipQuery = `
-                INSERT INTO memberships (uid, bid)
-                VALUES ($1, $2);
+                INSERT INTO memberships (uid, bid, joined)
+                VALUES ($1, $2, now());
             `;
             await pool.query(insertMembershipQuery, [joiner, block]);
             await pool.query('COMMIT');
@@ -1161,11 +1163,104 @@ const sendFriendRequest = async (req, res) => {
   }
   }
 
+  const singleThreadFetch = async (req, res) => {
+    const { tid } = req.params;
+  
+  try {
+  
+    const threadFetch = `
+      select t.*, u.username
+      from threads t, users u
+      where 
+        tid = $1
+        and t.uid = u.uid
+    `;
+    const threadResult = await pool.query(threadFetch, [tid]);
+  
+    if (threadResult.rows.length > 0) {
+      console.log(threadResult.rows)
+      res.status(200).json({ threads: threadResult.rows });
+    } else {
+      res.status(200).json({ message: 'Error fetching thread details'});
+    }
+  } catch (error) {
+    console.error('Database query error:', error.stack);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+  }
 
 
+  const singleThreadMessagesFetch = async (req, res) => {
+    const { tid } = req.params;
+  
+  try {
+  
+    const threadMessagesFetch = `
+      select m.*, u.username
+      from messages m, users u
+      where 
+        tid = $1
+        and m.uid = u.uid
+      order by created desc
+    `;
+    const threadResult = await pool.query(threadMessagesFetch, [tid]);
+  
+    if (threadResult.rows.length > 0) {
+      console.log(threadResult.rows)
+      res.status(200).json({ threads: threadResult.rows });
+    } else {
+      res.status(200).json({ message: 'Thread currently has no messages'});
+    }
+  } catch (error) {
+    console.error('Database query error:', error.stack);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+  }
 
 
+  
+  const postMessage = async (req, res) => {
+    const { tid } = req.params;
+    const { uid, body } = req.body;
+  
+    try {
+      const insertQuery = `
+        INSERT INTO messages (tid, uid, body, created)
+        VALUES ($1, $2, $3, now())
+      `;
+      const result = await pool.query(insertQuery, [tid, uid, body]);
+      res.status(200).json(result.rows[0]);
+    } catch (error) {
+      console.error('Error creating thread:', error.stack);
+      res.status(500).send('Failed to create thread');
+    }
+  }
 
+  const membershipStatus = async (req, res) => {
+    const { uid } = req.params;
+  
+  try {
+  
+    const membershipFetch = `
+      SELECT b.bid, b.b_name, n.n_name
+      FROM memberships m
+      JOIN blocks b ON m.bid = b.bid
+      JOIN neighborhoods n ON b.nid = n.nid
+      WHERE m.uid = $1;
+    `;
+    const threadResult = await pool.query(membershipFetch, [uid]);
+  
+    if (threadResult.rows.length > 0) {
+      console.log(threadResult.rows)
+      res.status(200).json({ threads: threadResult.rows });
+    } else {
+      res.status(200).json({ message: 'Membership Status: User is currently not a member of any block'});
+    }
+  } catch (error) {
+    console.error('Database query error:', error.stack);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+  }
 
 
 
@@ -1237,6 +1332,10 @@ module.exports = {
     findEligibleBlockForMembership,
     applyForBlockMembership,
     findJoinedBlocksPendingFetch,
+    singleThreadFetch,
+    singleThreadMessagesFetch,
+    postMessage,
+    membershipStatus,
 
     
 }

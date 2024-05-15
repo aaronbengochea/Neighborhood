@@ -33,7 +33,7 @@ function JoinedBlocksPending({reloadTrigger}) {
   }, [reloadTrigger]);
 
   return (
-    <div className="followed-blocks">
+    <div className="friends-list">
       <h2>Block Membership Application Pending</h2>
       <ul>
         {joinedBlocks.map(block => (
