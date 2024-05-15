@@ -34,7 +34,7 @@ function JoinedBlocksPending({reloadTrigger}) {
 
   return (
     <div className="friends-list">
-      <h2>Block Membership Application Pending</h2>
+      <h2>Block Membership Pending Application</h2>
       <ul>
         {joinedBlocks.map(block => (
           <li key={block.bid}>

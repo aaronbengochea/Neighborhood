@@ -54,7 +54,7 @@ function MembershipVoting() {
 
   return (
     <div className="friends-list">
-      <h2>Membership Voting - working w/button + updating membership if needed</h2>
+      <h2>Membership Voting</h2>
       <ul>
         {applicants.map(applicant => (
           <li key={applicant.uid}>

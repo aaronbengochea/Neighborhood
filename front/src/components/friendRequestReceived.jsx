@@ -49,7 +49,7 @@ function AcceptFriendRequests({onFriendAccepted}) {
 
   return (
     <div className="friends-list">
-      <h2>Friend Requests Received - working w/ buttons</h2>
+      <h2>Friend Requests Received</h2>
       <ul>
         {requests.map(request => (
           <li key={request.username}>

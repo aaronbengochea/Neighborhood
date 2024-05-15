@@ -34,7 +34,7 @@ function FollowedBlocks({reloadTrigger}) {
 
   return (
     <div className="friends-list">
-      <h2>Followed Blocks - State updated w/ change</h2>
+      <h2>Followed Blocks</h2>
       <ul>
         {followedBlocks.map(block => (
           <li key={block.bid}>

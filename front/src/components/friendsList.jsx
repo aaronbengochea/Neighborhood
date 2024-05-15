@@ -21,7 +21,6 @@ function FriendsList({reloadTrigger}) {
             ...friend,
             b_name: friend.b_name === null ? 'No Block' : friend.b_name
           }));
-          
           setFriends(friendsData);
         }
       } catch (error) {
@@ -35,7 +34,7 @@ function FriendsList({reloadTrigger}) {
 
   return (
     <div className="friends-list">
-      <h2>Friends List - State updated w/ change</h2>
+      <h2>Friends List</h2>
       <ul>
         {friends.map(friend => (
           <li key={friend.username}>{friend.username} ----- {friend.b_name}</li>

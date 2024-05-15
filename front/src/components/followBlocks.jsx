@@ -53,7 +53,7 @@ function FollowBlocks({ onBlockFollowed }) {
 
   return (
     <div className="friends-list">
-      <h2>Follow Blocks - working w/ buttons</h2>
+      <h2>Follow Blocks</h2>
       <ul>
         {blocks.map(block => (
           <li key={block.bid}>

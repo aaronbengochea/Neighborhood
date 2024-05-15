@@ -30,7 +30,7 @@ function NeighborsList({reloadTrigger}) {
 
   return (
     <div className="neighbors-list">
-      <h2>Neighbors List - State updated w/ change</h2>
+      <h2>Neighbors List</h2>
       <ul>
         {neighbors.map(neighbor => (
           <li key={neighbor.username}> {neighbor.username} ----- {neighbor.b_name}</li>
