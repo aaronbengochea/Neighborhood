@@ -939,7 +939,7 @@ const sendFriendRequest = async (req, res) => {
       console.log(threadResult.rows)
       res.status(200).json({ threads: threadResult.rows });
     } else {
-      res.status(404).send('No created neighbors threads found for this user');
+      res.status(200).json({message: 'User currently has no friends'});
     }
   } catch (error) {
     console.error('Database query error:', error.stack);
@@ -966,7 +966,7 @@ const sendFriendRequest = async (req, res) => {
       console.log(threadResult.rows)
       res.status(200).json({ threads: threadResult.rows });
     } else {
-      res.status(404).send('No created neighbors threads found for this user');
+      res.status(200).json({message: 'User currently has no neighbors'});
     }
   } catch (error) {
     console.error('Database query error:', error.stack);
@@ -993,7 +993,7 @@ const sendFriendRequest = async (req, res) => {
       console.log(threadResult.rows)
       res.status(200).json({ threads: threadResult.rows });
     } else {
-      res.status(404).send('User is not a member of a block');
+      res.status(200).json({message: 'User is currently not a member of a block'});
     }
   } catch (error) {
     console.error('Database query error:', error.stack);
@@ -1022,7 +1022,7 @@ const sendFriendRequest = async (req, res) => {
       console.log(threadResult.rows)
       res.status(200).json({ threads: threadResult.rows });
     } else {
-      res.status(404).send('User is not a member of a neighborhood');
+      res.status(200).json({message: 'User is currently not a member of a neighborhood'});
     }
   } catch (error) {
     console.error('Database query error:', error.stack);
@@ -1263,7 +1263,24 @@ const sendFriendRequest = async (req, res) => {
   }
   }
 
-
+  const usersFetch = async (req, res) => {
+  
+  try {
+    const membershipFetch = `
+      SELECT * from users
+    `;
+    const threadResult = await pool.query(membershipFetch);
+  
+    if (threadResult.rows.length > 0) {
+      res.status(200).json({ threads: threadResult.rows });
+    } else {
+      res.status(200).json({ message: 'Table does not exist'});
+    }
+  } catch (error) {
+    console.error('Database query error:', error.stack);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+  }
 
 
 
@@ -1337,6 +1354,7 @@ module.exports = {
     singleThreadMessagesFetch,
     postMessage,
     membershipStatus,
+    usersFetch,
 
     
 }

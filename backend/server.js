@@ -49,7 +49,7 @@ app.get('/thread/:tid', db.singleThreadFetch)
 app.get('/threadMessages/:tid', db.singleThreadMessagesFetch)
 app.post('/postMessage/:tid', db.postMessage)
 app.get('/membershipStatus/:uid', db.membershipStatus)
-
+app.get('/users', db.usersFetch)
 
 
 app.get('/visit', (req, res) => {

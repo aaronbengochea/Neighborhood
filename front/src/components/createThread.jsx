@@ -27,7 +27,12 @@ function CreateThread() {
           const uid = localStorage.getItem('uid');
           const res = await axios.get(`http://localhost:4000/friendsListThreadFetch/${uid}`);
           const friendsData = res.data && res.data.threads ? res.data.threads : [];
-          setFriends(friendsData);
+          if (res.data.message) {
+            console.log(res.data.message);
+            setFriends([]);
+          } else {
+            setFriends(friendsData); 
+          }
         } catch (error) {
           console.error('Failed to fetch friends:', error);
           setFriends([]);
@@ -45,7 +50,12 @@ function CreateThread() {
           const uid = localStorage.getItem('uid');
           const res = await axios.get(`http://localhost:4000/neighborsListThreadFetch/${uid}`);
           const neighborsData = res.data && res.data.threads ? res.data.threads : [];
-          setNeighbors(neighborsData);
+          if (res.data.message) {
+            console.log(res.data.message);
+            setNeighbors([]);
+          } else {
+            setNeighbors(neighborsData); 
+          }
         } catch (error) {
           console.error('Failed to fetch neighbors:', error);
           setNeighbors([]);
@@ -63,7 +73,12 @@ function CreateThread() {
           const uid = localStorage.getItem('uid');
           const res = await axios.get(`http://localhost:4000/blockFetch/${uid}`);
           const blockData = res.data && res.data.threads ? res.data.threads : [];
-          setBlock(blockData);
+          if (res.data.message) {
+            console.log(res.data.message);
+            setBlock([]);
+          } else {
+            setBlock(blockData); 
+          }
         } catch (error) {
           console.error('Failed to fetch neighbors:', error);
           setBlock([]);
@@ -81,7 +96,12 @@ function CreateThread() {
           const uid = localStorage.getItem('uid');
           const res = await axios.get(`http://localhost:4000/neighborhoodFetch/${uid}`);
           const neighborhoodData = res.data && res.data.threads ? res.data.threads : [];
-          setNeighborhood(neighborhoodData);
+          if (res.data.message) {
+            console.log(res.data.message);
+            setNeighborhood([]);
+          } else {
+            setNeighborhood(neighborhoodData); 
+          }
         } catch (error) {
           console.error('Failed to fetch neighbors:', error);
           setNeighborhood([]);
@@ -94,7 +114,6 @@ function CreateThread() {
 
   const handleChange = (e) => {
     setFormData({...formData, [e.target.name]: e.target.value});
-    console.log(e.target.name, e.target.value)
   };
 
   const handleSubmit = async (e) => {

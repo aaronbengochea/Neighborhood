@@ -81,29 +81,36 @@ function ThreadDetail() {
     }
   };
 
+
+
+
+
   return (
     <div>
       <Header />
       <div className="thread-detail">
         {thread ? (
-          <>
-            <h1>Thread + Messages</h1>
-            <p>Subject: {thread.subject}</p>
-            <p>Body: {thread.body}</p>
-            <p>Posted by: {thread.username}</p>
-            <p>Created at: {new Date(thread.created).toLocaleString()}</p>
-            <p>Sent to: {thread.receivertype}</p>
-            <div className="messages">
-              <h2>Messages</h2>
+          <><h1>Thread + Messages</h1>
+          <div className="thread-card">
+            <h2>{thread.subject} - <small>{`Posted by ${thread.username}`}</small></h2>
+            
+            <p className="thread-body">Subject: {thread.subject}</p>
+            <p className="thread-date">Created at: {new Date(thread.created).toLocaleString()}</p>
+            <p className='thread-date'>Sent to: {thread.receivertype}</p>
+          
+          </div>
+          <h2>Messages</h2>
+            <div className="thread-card">
+              
               {messages.map(message => (
                 <div key={message.mid} className="message">
-                  <p>{message.body}</p>
-                  <p>Posted by: {message.username}</p>
-                  <p>Created at: {new Date(message.created).toLocaleString()}</p>
+                  <p className='thread-body'>{message.body}</p>
+                  <p className='thread-date'>Posted by: {message.username}</p>
+                  <p className='thread-date'>Created at: {new Date(message.created).toLocaleString()}</p>
                 </div>
               ))}
             </div>
-            <form onSubmit={handleNewMessageSubmit}>
+            <form className='form-field' onSubmit={handleNewMessageSubmit}>
               <textarea
                 value={newMessage}
                 onChange={handleNewMessageChange}
