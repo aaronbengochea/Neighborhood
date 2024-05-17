@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import env from 'react-dotenv'
 
-const GOOGLE_API_KEY = 'AIzaSyCiAc-8wst8vnD5B1XKumZYXYqfrpWyDCs';
+const GOOGLE_API_KEY = env.GOOGLE_MAPS_API_KEY;
 
 function Register() {
   const [formData, setFormData] = useState({
